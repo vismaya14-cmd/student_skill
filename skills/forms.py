@@ -42,9 +42,11 @@ class UserProfileForm(forms.ModelForm):
         return profile
 
 class ServicePostForm(forms.ModelForm):
+    custom_category = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter your category'}))
+
     class Meta:
         model = ServicePost
-        fields = ['title', 'description', 'category', 'price_type', 'price', 'location']
+        fields = ['title', 'description', 'category', 'custom_category', 'price_type', 'price', 'location']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5}),
         }
@@ -53,11 +55,25 @@ class ServicePostForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
+        self.fields['category'].widget.attrs.update({'id': 'id_category'})
+        self.fields['custom_category'].widget.attrs.update({'id': 'id_custom_category'})
+
+    def clean(self):
+        cleaned_data = super().clean()
+        category = cleaned_data.get('category')
+        custom = cleaned_data.get('custom_category')
+        if category == 'other' and not custom:
+            self.add_error('custom_category', 'Please specify your custom category.')
+        if category == 'other' and custom:
+            cleaned_data['category'] = custom
+        return cleaned_data
 
 class ServiceRequestForm(forms.ModelForm):
+    custom_category = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter your category'}))
+
     class Meta:
         model = ServiceRequest
-        fields = ['title', 'description', 'category', 'budget']
+        fields = ['title', 'description', 'category', 'custom_category', 'budget']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5}),
         }
@@ -66,6 +82,18 @@ class ServiceRequestForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
+        self.fields['category'].widget.attrs.update({'id': 'id_category_req'})
+        self.fields['custom_category'].widget.attrs.update({'id': 'id_custom_category_req'})
+
+    def clean(self):
+        cleaned_data = super().clean()
+        category = cleaned_data.get('category')
+        custom = cleaned_data.get('custom_category')
+        if category == 'other' and not custom:
+            self.add_error('custom_category', 'Please specify your custom category.')
+        if category == 'other' and custom:
+            cleaned_data['category'] = custom
+        return cleaned_data
 
 class MessageForm(forms.ModelForm):
     class Meta:

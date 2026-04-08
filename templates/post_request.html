@@ -32,7 +32,35 @@
                         <label class="form-label fw-bold small text-warning text-uppercase">Budget (Optional)</label>
                         {{ form.budget }}
                     </div>
+                    <div class="col-md-12" id="custom_category_wrapper_req" style="display: none;">
+                        <label class="form-label fw-bold small text-warning text-uppercase">Specify Your Need</label>
+                        {{ form.custom_category }}
+                        <div class="form-text text-dim text-opacity-50">Be specific about what skill you are looking for.</div>
+                    </div>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const categorySelect = document.getElementById('id_category_req');
+                        const customWrapper = document.getElementById('custom_category_wrapper_req');
+                        const customInput = document.getElementById('id_custom_category_req');
+
+                        function handleCategoryChange() {
+                            if (categorySelect.value === 'other') {
+                                customWrapper.style.display = 'block';
+                                customInput.setAttribute('required', 'required');
+                                customInput.focus();
+                            } else {
+                                customWrapper.style.display = 'none';
+                                customInput.removeAttribute('required');
+                                customInput.value = ''; // Clear if hidden
+                            }
+                        }
+
+                        categorySelect.addEventListener('change', handleCategoryChange);
+                        handleCategoryChange(); // Run on load
+                    });
+                </script>
 
                 <div class="mb-5">
                     <label class="form-label fw-bold small text-warning text-uppercase">Help Needed</label>

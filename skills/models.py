@@ -3,11 +3,9 @@ from django.contrib.auth.models import User
 
 # Choices for categories
 CATEGORY_CHOICES = [
-    ('technology', 'Technology & Programming'),
-    ('design', 'Graphic Design & Creative'),
-    ('writing', 'Writing & Translation'),
-    ('languages', 'Languages & Tutoring'),
-    ('business', 'Business & Marketing'),
+    ('design', 'Design'),
+    ('coding', 'Coding'),
+    ('teaching', 'Teaching'),
     ('other', 'Other'),
 ]
 
@@ -24,11 +22,9 @@ class UserProfile(models.Model):
 
 class ServicePost(models.Model):
     CATEGORY_CHOICES = [
-        ('technology', 'Technology & Programming'),
-        ('design', 'Graphic Design & Creative'),
-        ('writing', 'Writing & Translation'),
-        ('languages', 'Languages & Tutoring'),
-        ('business', 'Business & Marketing'),
+        ('design', 'Design'),
+        ('coding', 'Coding'),
+        ('teaching', 'Teaching'),
         ('other', 'Other'),
     ]
 
@@ -39,10 +35,16 @@ class ServicePost(models.Model):
     price_type = models.CharField(max_length=20, choices=[('free', 'Free'), ('paid', 'Paid'), ('negotiable', 'Negotiable')])
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     location = models.CharField(max_length=255, blank=True, help_text="Where is this service available?")
+    custom_category = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if self.category == 'other' and self.custom_category:
+            self.category = self.custom_category
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -53,11 +55,17 @@ class ServiceRequest(models.Model):
     description = models.TextField()
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     budget = models.CharField(max_length=100, blank=True, default='', help_text='e.g. Free, ₹500, Negotiable')
+    custom_category = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if self.category == 'other' and self.custom_category:
+            self.category = self.custom_category
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
