@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Request a Service - SkillHub{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card form-card-wide">
+        <h2 class="form-title">Need a Hand?</h2>
+        <p class="form-subtitle">Post what you need and let a student helper find you</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <p class="form-help">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <p class="form-help" style="color: var(--danger);">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-success flex-1" style="color:white;">Post Request</button>
+                <a href="{% url 'home' %}" class="btn btn-secondary flex-1">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

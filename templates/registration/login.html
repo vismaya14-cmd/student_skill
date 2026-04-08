@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillHub - Login{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-5 mx-auto">
+        <div class="card p-4 shadow-lg border-0">
+            <div class="text-center mb-4">
+                <div class="bg-info bg-opacity-10 p-4 rounded-circle d-inline-block mb-3">
+                    <i class="fas fa-lock text-info fs-1"></i>
+                </div>
+                <h2 class="fw-bold">Welcome Back</h2>
+                <p class="text-secondary">Login to access the student marketplace</p>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="alert alert-danger small">
+                        Invalid username or password. Please try again.
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label small text-info text-uppercase fw-bold">Username</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small text-info text-uppercase fw-bold">Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+
+                <div class="d-grid gap-2 mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-sm">Sign In</button>
+                </div>
+
+                <div class="text-center border-top border-secondary pt-4">
+                    <p class="text-secondary small mb-0">Don't have an account? 
+                        <a href="{% url 'register' %}" class="text-decoration-none fw-bold text-info">Create one now</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

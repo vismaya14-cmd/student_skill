@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillHub - Join Us{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-5 mx-auto">
+        <div class="card p-4 shadow-lg border-0">
+            <div class="text-center mb-4">
+                <div class="bg-primary bg-opacity-10 p-4 rounded-circle d-inline-block mb-3">
+                    <i class="fas fa-user-plus text-primary fs-1"></i>
+                </div>
+                <h2 class="fw-bold">Join SkillHub</h2>
+                <p class="text-secondary">Create your student account today</p>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label small text-info text-uppercase fw-bold">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text text-dim small">{{ field.help_text|safe }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="d-grid gap-2 mt-4 mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-sm">Create Account</button>
+                </div>
+
+                <div class="text-center border-top border-secondary pt-4">
+                    <p class="text-secondary small mb-0">Already have an account? 
+                        <a href="{% url 'login' %}" class="text-decoration-none fw-bold text-info">Sign in here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

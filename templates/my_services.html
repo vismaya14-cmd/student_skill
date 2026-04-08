@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillHub - My Hub{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-lg-8">
+        <h1 class="display-5 fw-bold mb-2">My Hub</h1>
+        <p class="text-secondary fs-5">Manage your service offerings and help requests.</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Services Management -->
+    <div class="col-lg-12 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0">My Active Services</h3>
+            <a href="{% url 'post_service' %}" class="btn btn-primary btn-sm">Post New</a>
+        </div>
+        
+        <div class="row g-4">
+            {% for service in user_services %}
+                <div class="col-md-4">
+                    <div class="card p-3 h-100 shadow-sm border-info border-opacity-25">
+                        <span class="badge bg-info text-dark align-self-start mb-2">{{ service.get_category_display }}</span>
+                        <h5 class="fw-bold">{{ service.title }}</h5>
+                        <p class="text-dim small text-truncate-2">{{ service.description }}</p>
+                        <div class="mt-auto pt-3 d-flex justify-content-between align-items-center border-top border-secondary">
+                            <a href="{% url 'service_detail' service.pk %}" class="btn btn-sm btn-outline-info">View</a>
+                            <a href="{% url 'delete_service' service.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this service?')">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="card p-5 text-center bg-transparent border-dashed">
+                        <p class="text-dim mb-0">You haven't offered any services yet.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Requests Management -->
+    <div class="col-lg-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0">My Requests</h3>
+            <a href="{% url 'post_request' %}" class="btn btn-warning btn-sm">Post Request</a>
+        </div>
+        
+        <div class="row g-4">
+            {% for req in user_requests %}
+                <div class="col-md-4">
+                    <div class="card p-3 h-100 shadow-sm border-warning border-opacity-25">
+                        <span class="badge bg-warning text-dark align-self-start mb-2">{{ req.get_category_display }}</span>
+                        <h5 class="fw-bold">{{ req.title }}</h5>
+                        <div class="mt-auto pt-3 text-end border-top border-secondary">
+                            <span class="small text-dim">Active</span>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="card p-5 text-center bg-transparent border-dashed">
+                        <p class="text-dim mb-0">You haven't posted any help requests.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillHub - Service Requests{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-lg-8">
+        <h1 class="display-5 fw-bold mb-3">Service Requests</h1>
+        <p class="text-secondary fs-5">See what fellow students need help with.</p>
+    </div>
+    <div class="col-lg-4 text-lg-end align-self-end">
+        <a href="{% url 'post_request' %}" class="btn btn-primary">
+            <i class="fas fa-bullhorn me-2"></i>Request Help
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Sidebar Filters -->
+    <div class="col-md-3 mb-4">
+        <div class="card p-3">
+            <h5 class="mb-3"><i class="fas fa-filter me-2 text-info"></i>Categories</h5>
+            <div class="list-group list-group-flush">
+                <a href="{% url 'requests_hub' %}" class="list-group-item list-group-item-action bg-transparent text-white border-0 {% if not category %}active fw-bold text-info{% endif %}">
+                    All Categories
+                </a>
+                {% for cat_id, cat_name in categories %}
+                    <a href="?category={{ cat_id }}" class="list-group-item list-group-item-action bg-transparent text-white border-0 {% if category == cat_id %}active fw-bold text-info{% endif %}">
+                        {{ cat_name }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Grid -->
+    <div class="col-md-9">
+        <div class="row g-4">
+            {% for req in requests %}
+                <div class="col-lg-6">
+                    <div class="card h-100 p-3" style="border-left: 4px solid var(--accent-color);">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-secondary shadow-sm">{{ req.get_category_display }}</span>
+                            <span class="text-warning fw-bold">
+                                {{ req.budget|default:"Negotiable" }}
+                            </span>
+                        </div>
+                        <h4 class="card-title fw-bold">{{ req.title }}</h4>
+                        <p class="card-text text-secondary">{{ req.description|truncatewords:20 }}</p>
+                        
+                        <div class="mt-auto pt-3 d-flex align-items-center justify-content-between border-top border-secondary">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-circle me-2 fs-4 text-dim"></i>
+                                <span class="small fw-semibold">{{ req.requester.username }}</span>
+                            </div>
+                            <span class="small text-dim">{{ req.created_at|date:"M d" }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-bullhorn mb-3 fs-1 text-dim"></i>
+                    <h3>No requests yet.</h3>
+                    <p class="text-secondary">Be the first to ask for help!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

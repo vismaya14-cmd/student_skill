@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillHub - {{ service.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Service Info -->
+    <div class="col-lg-8">
+        <div class="card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="badge bg-info text-dark shadow-sm">{{ service.get_category_display }}</span>
+                <span class="text-dim">Posted {{ service.created_at|date:"F d, Y" }}</span>
+            </div>
+            
+            <h1 class="display-6 fw-bold mb-3">{{ service.title }}</h1>
+            
+            <div class="d-flex align-items-center mb-4 text-secondary">
+                <div class="me-4"><i class="fas fa-map-marker-alt me-2 text-info"></i>{{ service.location|default:"Online / Not Specified" }}</div>
+                <div><i class="fas fa-tag me-2 text-info"></i>
+                    {% if service.price_type == 'free' %}Free Service{% elif service.price %}₹{{ service.price }}{% else %}Price Negotiable{% endif %}
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3">Description</h5>
+            <p class="fs-5 text-secondary mb-5">{{ service.description|linebreaks }}</p>
+
+            <hr class="border-secondary opacity-25">
+
+            <!-- Review Section -->
+            <div class="mt-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold">Reviews ({{ reviews.count }})</h3>
+                    {% if avg_rating %}
+                        <div class="h4 text-warning">
+                            <i class="fas fa-star me-1"></i>{{ avg_rating|floatformat:1 }} / 5.0
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Review Form -->
+                {% if user.is_authenticated and user != service.author %}
+                    <div class="card p-3 mb-4 bg-dark border-info">
+                        <h5>Leave a Review</h5>
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{ review_form.as_p }}
+                            <button type="submit" name="add_review" class="btn btn-primary btn-sm">Submit Review</button>
+                        </form>
+                    </div>
+                {% endif %}
+
+                <!-- Review List -->
+                {% for review in reviews %}
+                    <div class="card p-3 mb-3 bg-transparent border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold text-info">{{ review.author.username }}</span>
+                            <span class="text-warning">
+                                {% for i in "12345"|make_list %}{% if forloop.counter <= review.rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}
+                            </span>
+                        </div>
+                        <p class="text-secondary mb-0">{{ review.comment }}</p>
+                        <small class="text-dim d-block mt-2">{{ review.created_at|date:"M d, Y" }}</small>
+                    </div>
+                {% empty %}
+                    <p class="text-secondary">No reviews yet. Be the first to rate!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar: Provider Info & Contact -->
+    <div class="col-lg-4">
+        <div class="card p-4 sticky-top" style="top: 100px;">
+            <div class="text-center mb-4">
+                <i class="fas fa-user-circle display-4 text-dim mb-3"></i>
+                <h4 class="fw-bold">{{ service.author.username }}</h4>
+                <p class="text-secondary small">Service Provider</p>
+                <a href="{% url 'profile' service.author.username %}" class="btn btn-sm btn-outline-info w-100">View Profile</a>
+            </div>
+
+            <hr class="border-secondary mb-4">
+
+            {% if user.is_authenticated %}
+                {% if user != service.author %}
+                    <h5 class="fw-bold mb-3">Send a Message</h5>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ message_form.as_p }}
+                        <button type="submit" name="send_message" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Contact Student
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-info py-2 small">
+                        This is your service post.
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center p-3">
+                    <p class="small text-secondary">Please log in to contact the provider.</p>
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary w-100">Login to Contact</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

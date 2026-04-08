@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillHub - Offer a Service{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-7 mx-auto">
+        <div class="card p-4 shadow">
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-info bg-opacity-10 p-3 rounded-circle me-3">
+                    <i class="fas fa-rocket text-info fs-3"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-0">Post a Service</h2>
+                    <p class="text-secondary small mb-0">Share your skills with the community.</p>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="form-label fw-bold small text-info text-uppercase">Title</label>
+                    {{ form.title }}
+                    <div class="form-text text-dim">Be clear and descriptive.</div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-info text-uppercase">Category</label>
+                        {{ form.category }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-info text-uppercase">Location</label>
+                        {{ form.location }}
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-info text-uppercase">Price Type</label>
+                        {{ form.price_type }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-info text-uppercase">Price (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-info">₹</span>
+                            {{ form.price }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="form-label fw-bold small text-info text-uppercase">Detailed Description</label>
+                    {{ form.description }}
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold">Publish Service</button>
+                    <a href="{% url 'home' %}" class="btn btn-link text-dim text-decoration-none">Back to Marketplace</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

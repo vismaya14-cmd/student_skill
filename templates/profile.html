@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillHub - {{ profile.user.username }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Profile Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card p-4 text-center h-100">
+            <div class="mb-3">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" class="rounded-circle border border-info border-3 p-1" width="120" height="120" style="object-fit: cover;">
+                {% else %}
+                    <i class="fas fa-user-circle display-1 text-dim"></i>
+                {% endif %}
+            </div>
+            <h2 class="fw-bold mb-1">{{ profile.user.first_name|default:profile.user.username }}</h2>
+            <p class="text-secondary small mb-3">@{{ profile.user.username }}</p>
+            <div class="badge bg-info text-dark mb-4 px-3 py-2 rounded-pill shadow-sm">Verified Student</div>
+            
+            <div class="text-start border-top border-secondary pt-4">
+                <p class="mb-2"><i class="fas fa-envelope me-2 text-info"></i>{{ profile.user.email }}</p>
+                {% if profile.phone %}
+                    <p class="mb-2"><i class="fas fa-phone me-2 text-info"></i>{{ profile.phone }}</p>
+                {% endif %}
+                <p class="mb-0"><i class="fas fa-map-marker-alt me-2 text-info"></i>{{ profile.location|default:"Bengaluru, India" }}</p>
+            </div>
+
+            {% if user == profile.user %}
+                <div class="mt-5">
+                    <a href="{% url 'edit_profile' %}" class="btn btn-outline-info w-100">Edit Profile</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bio and Services -->
+    <div class="col-lg-8">
+        <div class="card p-4 mb-4">
+            <h4 class="fw-bold mb-3">About Me</h4>
+            <p class="text-secondary fs-5">{{ profile.bio|default:"No bio provided." }}</p>
+            
+            <h5 class="fw-bold mt-4 mb-2">My Skills</h5>
+            <div class="d-flex flex-wrap gap-2">
+                {% for skill in profile.skills_list %}
+                    <span class="badge bg-secondary">{{ skill }}</span>
+                {% empty %}
+                    <span class="text-dim">No skills listed.</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <h3 class="fw-bold mb-4 mt-5">Services Offered</h3>
+        <div class="row g-3">
+            {% for service in user_services %}
+                <div class="col-md-6 text-start">
+                    <div class="card p-3 h-100">
+                        <span class="badge bg-info text-dark align-self-start mb-2">{{ service.get_category_display }}</span>
+                        <h5 class="fw-bold">{{ service.title }}</h5>
+                        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top border-secondary mt-3">
+                            <span class="text-info fw-bold">₹{{ service.price|default:"Free" }}</span>
+                            <a href="{% url 'service_detail' service.pk %}" class="btn btn-sm btn-outline-info">View</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-4 card bg-transparent border-dashed">
+                    <p class="text-dim mb-0">No active services posted by this student.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - SkillHub{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <h2 class="form-title">Welcome Back</h2>
+        <p class="form-subtitle">Log in to your account to trade skills</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <p class="form-help" style="color: var(--danger);">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary btn-block mt-2">Login to Account</button>
+        </form>
+
+        <div class="form-divider">
+            <span>OR</span>
+        </div>
+
+        <p class="text-center" style="font-size: 0.9rem; color: var(--text-muted);">
+            Don't have an account? <a href="{% url 'register' %}" style="font-weight: 600;">Create One</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
