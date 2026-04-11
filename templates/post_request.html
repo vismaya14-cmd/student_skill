@@ -4,75 +4,102 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-lg-7 mx-auto">
-        <div class="card p-4 shadow">
-            <div class="d-flex align-items-center mb-4">
-                <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
-                    <i class="fas fa-bullhorn text-warning fs-3"></i>
-                </div>
-                <div>
-                    <h2 class="fw-bold mb-0">Request Help</h2>
-                    <p class="text-secondary small mb-0">Ask for the skills you need.</p>
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-lg overflow-hidden">
+            <div class="card-header bg-warning bg-opacity-10 border-0 p-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning p-3 rounded-4 me-3 shadow-sm">
+                        <i class="fas fa-bullhorn text-dark fs-3"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0">Request Assistance</h2>
+                        <p class="text-dim small mb-0">Can't find what you need? Ask the community.</p>
+                    </div>
                 </div>
             </div>
 
-            <form method="POST">
-                {% csrf_token %}
-                <div class="mb-4">
-                    <label class="form-label fw-bold small text-warning text-uppercase">Request Title</label>
-                    {{ form.title }}
-                </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Section 1: The Need -->
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4 text-warning d-flex align-items-center">
+                            <span class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 0.8rem;">1</span>
+                            Request Details
+                        </h5>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Request Title</label>
+                            {{ form.title }}
+                            <div class="form-text extra-small opacity-50">Be specific (e.g., "Need help with Organic Chemistry Lab Report")</div>
+                        </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small text-warning text-uppercase">Skill Category</label>
-                        {{ form.category }}
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Skill Category</label>
+                                {{ form.category }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Estimated Budget</label>
+                                {{ form.budget }}
+                            </div>
+                            <div class="col-12" id="custom_category_wrapper_req" style="display: none;">
+                                <div class="p-3 rounded-4 bg-warning bg-opacity-10 border border-warning border-opacity-25">
+                                    <label class="form-label small fw-bold text-warning text-uppercase tracking-wider">Specify Your Requirement</label>
+                                    {{ form.custom_category }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small text-warning text-uppercase">Budget (Optional)</label>
-                        {{ form.budget }}
+
+                    <!-- Section 2: Full Description -->
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4 text-warning d-flex align-items-center">
+                            <span class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 0.8rem;">2</span>
+                            Help Needed
+                        </h5>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Description</label>
+                            {{ form.description }}
+                            <div class="form-text extra-small opacity-50">Explain exactly what help you need and any deadlines.</div>
+                        </div>
                     </div>
-                    <div class="col-md-12" id="custom_category_wrapper_req" style="display: none;">
-                        <label class="form-label fw-bold small text-warning text-uppercase">Specify Your Need</label>
-                        {{ form.custom_category }}
-                        <div class="form-text text-dim text-opacity-50">Be specific about what skill you are looking for.</div>
+
+                    <div class="d-grid gap-3 pt-4 border-top border-secondary border-opacity-25">
+                        <button type="submit" class="btn btn-warning btn-lg fw-bold py-3 text-dark">
+                            <i class="fas fa-paper-plane me-2"></i>Post My Request
+                        </button>
+                        <a href="{% url 'requests_hub' %}" class="btn btn-link text-dim text-decoration-none small">
+                            <i class="fas fa-arrow-left me-2"></i>Discard and go back
+                        </a>
                     </div>
-                </div>
-
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const categorySelect = document.getElementById('id_category_req');
-                        const customWrapper = document.getElementById('custom_category_wrapper_req');
-                        const customInput = document.getElementById('id_custom_category_req');
-
-                        function handleCategoryChange() {
-                            if (categorySelect.value === 'other') {
-                                customWrapper.style.display = 'block';
-                                customInput.setAttribute('required', 'required');
-                                customInput.focus();
-                            } else {
-                                customWrapper.style.display = 'none';
-                                customInput.removeAttribute('required');
-                                customInput.value = ''; // Clear if hidden
-                            }
-                        }
-
-                        categorySelect.addEventListener('change', handleCategoryChange);
-                        handleCategoryChange(); // Run on load
-                    });
-                </script>
-
-                <div class="mb-5">
-                    <label class="form-label fw-bold small text-warning text-uppercase">Help Needed</label>
-                    {{ form.description }}
-                </div>
-
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-warning btn-lg py-3 fw-bold">Post Request</button>
-                    <a href="{% url 'requests_hub' %}" class="btn btn-link text-dim text-decoration-none">Back to Requests</a>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categorySelect = document.getElementById('id_category_req');
+        const customWrapper = document.getElementById('custom_category_wrapper_req');
+        const customInput = document.getElementById('id_custom_category_req');
+
+        function toggleCustomCategory() {
+            if (categorySelect.value === 'other') {
+                customWrapper.style.display = 'block';
+                // Handled in Django forms to avoid client-side validation errors
+                customInput.setAttribute('placeholder', 'e.g. Note taking, Research help');
+                customInput.focus();
+            } else {
+                customWrapper.style.display = 'none';
+                customInput.value = '';
+            }
+        }
+
+        categorySelect.addEventListener('change', toggleCustomCategory);
+        toggleCustomCategory(); // Initial state
+    });
+</script>
 {% endblock %}
+

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import UserProfile, ServicePost, ServiceRequest, Message, Review
+from .models import UserProfile, ServicePost, ServiceRequest, Message, Review, ServiceBooking
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -42,40 +42,83 @@ class UserProfileForm(forms.ModelForm):
         return profile
 
 class ServicePostForm(forms.ModelForm):
-    custom_category = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter your category'}))
+    custom_category = forms.CharField(
+        max_length=50, 
+        required=False, 
+        widget=forms.TextInput(attrs={'placeholder': 'Specify your custom category (e.g. Logo Design, Yoga)'})
+    )
 
     class Meta:
         model = ServicePost
-        fields = ['title', 'description', 'category', 'custom_category', 'price_type', 'price', 'location']
+        fields = ['title', 'description', 'category', 'custom_category', 'image', 'payment_type', 'price', 'location', 'payment_method', 'delivery_time']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 5}),
+            'title': forms.TextInput(attrs={'placeholder': 'Enter a catchy title for your service'}),
+            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe what you offer in detail...'}),
+            'price': forms.NumberInput(attrs={'placeholder': '0.00'}),
+            'location': forms.TextInput(attrs={'placeholder': 'e.g., Main Campus, Library, Study Hall'}),
+            'payment_method': forms.Select(attrs={'class': 'form-select'}),
+            'delivery_time': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['payment_type'].required = True
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
         self.fields['category'].widget.attrs.update({'id': 'id_category'})
         self.fields['custom_category'].widget.attrs.update({'id': 'id_custom_category'})
+        self.fields['payment_type'].widget.attrs.update({'id': 'id_payment_type'})
+        self.fields['price'].widget.attrs.update({'id': 'id_price'})
 
     def clean(self):
         cleaned_data = super().clean()
         category = cleaned_data.get('category')
         custom = cleaned_data.get('custom_category')
-        if category == 'other' and not custom:
-            self.add_error('custom_category', 'Please specify your custom category.')
-        if category == 'other' and custom:
-            cleaned_data['category'] = custom
+        payment_type = cleaned_data.get('payment_type')
+        price = cleaned_data.get('price')
+
+        # Handle "Other" category replacement
+        if category == 'other':
+            if not custom:
+                self.add_error('custom_category', 'Please specify your custom category.')
+            else:
+                cleaned_data['category'] = custom
+
+        # Conditional validation for Price
+        if payment_type == 'paid':
+            if not price or price <= 0:
+                self.add_error('price', 'Please specify a valid price for your paid service.')
+        else:
+            cleaned_data['price'] = None
+
         return cleaned_data
 
+class ServiceBookingForm(forms.ModelForm):
+    class Meta:
+        model = ServiceBooking
+        fields = ['message']
+        widgets = {
+            'message': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional: Add a message for the provider...'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['message'].widget.attrs.update({'class': 'form-control'})
+
 class ServiceRequestForm(forms.ModelForm):
-    custom_category = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter your category'}))
+    custom_category = forms.CharField(
+        max_length=50, 
+        required=False, 
+        widget=forms.TextInput(attrs={'placeholder': 'Specify your custom skill need...'})
+    )
 
     class Meta:
         model = ServiceRequest
         fields = ['title', 'description', 'category', 'custom_category', 'budget']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 5}),
+            'title': forms.TextInput(attrs={'placeholder': 'What are you looking for?'}),
+            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Provide details about the help you need...'}),
+            'budget': forms.TextInput(attrs={'placeholder': 'e.g., Free, ₹500, Negotiable'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -89,24 +132,26 @@ class ServiceRequestForm(forms.ModelForm):
         cleaned_data = super().clean()
         category = cleaned_data.get('category')
         custom = cleaned_data.get('custom_category')
-        if category == 'other' and not custom:
-            self.add_error('custom_category', 'Please specify your custom category.')
-        if category == 'other' and custom:
-            cleaned_data['category'] = custom
+        
+        if category == 'other':
+            if not custom:
+                self.add_error('custom_category', 'Please specify your custom requirement.')
+            else:
+                cleaned_data['category'] = custom
         return cleaned_data
 
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
-        fields = ['content']
+        fields = ['message']
         widgets = {
-            'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Type your message here...'}),
+            'message': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Type your message here...'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['content'].widget.attrs.update({'class': 'form-control'})
-        self.fields['content'].label = ""
+        self.fields['message'].widget.attrs.update({'class': 'form-control'})
+        self.fields['message'].label = ""
 
 class ReviewForm(forms.ModelForm):
     class Meta:

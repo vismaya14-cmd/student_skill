@@ -3,60 +3,75 @@
 {% block title %}SkillHub - Edit Your Profile{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-6 mx-auto">
-        <div class="card p-4 shadow">
-            <h2 class="fw-bold mb-4"><i class="fas fa-user-edit me-2 text-info"></i>Edit Profile</h2>
-            
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="mb-4 text-center">
-                    {% if user.profile.avatar %}
-                        <img src="{{ user.profile.avatar.url }}" class="rounded-circle border border-info border-2 p-1 mb-3" width="100" height="100" style="object-fit: cover;">
-                    {% endif %}
-                    <div class="mb-3">
-                        <label for="{{ form.avatar.id_for_label }}" class="form-label d-block small text-dim text-start text-center">Change Avatar</label>
-                        {{ form.avatar }}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(15px);">
+            <div class="card-body p-5">
+                <div class="d-flex align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-25">
+                    <div class="bg-info bg-opacity-10 rounded-3 p-3 me-4">
+                        <i class="fas fa-user-edit text-info fs-3"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-1 text-white">Edit Profile</h2>
+                        <p class="text-dim mb-0">Customize how other students see your marketplace persona.</p>
                     </div>
                 </div>
 
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label small text-dim">Full Name</label>
-                        {{ form.first_name }}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small text-dim">Email Address</label>
-                        {{ form.email }}
-                    </div>
-                </div>
+                <form method="post" enctype="multipart/form-data" class="space-y-4">
+                    {% csrf_token %}
+                    
+                    <div class="row g-4">
+                        <!-- Personal Info -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Email Address</label>
+                            {{ form.email }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Phone Number</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Location</label>
+                            {{ form.location }}
+                        </div>
 
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label small text-dim">Phone Number</label>
-                        {{ form.phone }}
+                        <div class="col-12 mt-4">
+                            <label class="form-label fw-bold">Skills Offered <span class="text-info small ms-2">(Comma separated)</span></label>
+                            {{ form.skills_offered }}
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <label class="form-label fw-bold">Bio / About You</label>
+                            {{ form.bio }}
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <div class="p-4 rounded-4 bg-dark bg-opacity-25 border border-secondary border-opacity-25">
+                                <label class="form-label fw-bold mb-3"><i class="fas fa-camera me-2 text-info"></i>Profile Avatar</label>
+                                <div class="d-flex align-items-center gap-4">
+                                    {% if user.profile.avatar %}
+                                        <img src="{{ user.profile.avatar.url }}" class="rounded-circle shadow-sm border border-secondary" width="70" height="70" style="object-fit: cover;">
+                                    {% endif %}
+                                    <div class="flex-grow-1">
+                                        {{ form.avatar }}
+                                        <div class="form-text text-dim mt-2 small">Upload a professional photo to build trust with other students.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label small text-dim">Location</label>
-                        {{ form.location }}
+
+                    <div class="mt-5 d-flex gap-3">
+                        <button type="submit" class="btn btn-info px-5 py-2 fw-bold text-dark rounded-3 shadow-sm">Save Changes</button>
+                        <a href="{% url 'profile' user.username %}" class="btn btn-outline-secondary px-4 py-2 rounded-3">Cancel</a>
                     </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small text-dim">Skills (comma-separated)</label>
-                    {{ form.skills_offered }}
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label small text-dim">Bio / Experience</label>
-                    {{ form.bio }}
-                </div>
-
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
-                    <a href="{% url 'profile' user.username %}" class="btn btn-outline-secondary">Cancel</a>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>

@@ -24,7 +24,15 @@
                     <div class="card p-3 h-100 shadow-sm border-info border-opacity-25">
                         <span class="badge bg-info text-dark align-self-start mb-2">{{ service.get_category_display }}</span>
                         <h5 class="fw-bold">{{ service.title }}</h5>
-                        <p class="text-dim small text-truncate-2">{{ service.description }}</p>
+                        <p class="text-dim small text-truncate-2 mb-3">{{ service.description }}</p>
+                        <div class="mb-3">
+                            <span class="price">
+                                <i class="fas fa-tag"></i>
+                                {% if service.payment_type == 'free' %}Free
+                                {% elif service.payment_type == 'paid' %}₹{{ service.price|floatformat:0 }}
+                                {% else %}Negotiable{% endif %}
+                            </span>
+                        </div>
                         <div class="mt-auto pt-3 d-flex justify-content-between align-items-center border-top border-secondary">
                             <a href="{% url 'service_detail' service.pk %}" class="btn btn-sm btn-outline-info">View</a>
                             <a href="{% url 'delete_service' service.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this service?')">Delete</a>

@@ -4,90 +4,187 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-lg-7 mx-auto">
-        <div class="card p-4 shadow">
-            <div class="d-flex align-items-center mb-4">
-                <div class="bg-info bg-opacity-10 p-3 rounded-circle me-3">
-                    <i class="fas fa-rocket text-info fs-3"></i>
-                </div>
-                <div>
-                    <h2 class="fw-bold mb-0">Post a Service</h2>
-                    <p class="text-secondary small mb-0">Share your skills with the community.</p>
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-lg overflow-hidden">
+            <div class="card-header bg-info bg-opacity-10 border-0 p-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info p-3 rounded-4 me-3 shadow-sm">
+                        <i class="fas fa-rocket text-dark fs-3"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0">List Your Skill</h2>
+                        <p class="text-dim small mb-0">Help fellow students and grow your reputation.</p>
+                    </div>
                 </div>
             </div>
 
-            <form method="POST">
-                {% csrf_token %}
-                <div class="mb-4">
-                    <label class="form-label fw-bold small text-info text-uppercase">Title</label>
-                    {{ form.title }}
-                    <div class="form-text text-dim">Be clear and descriptive.</div>
-                </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small text-info text-uppercase">Category</label>
-                        {{ form.category }}
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-4 border-0 mb-5 p-4 shadow-sm">
+                        <h6 class="fw-bold mb-3 d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle me-2"></i>Please correct the following errors:
+                        </h6>
+                        <ul class="mb-0 extra-small list-unstyled">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li class="mb-1 d-flex align-items-center">
+                                        <i class="fas fa-caret-right me-2 opacity-50"></i>
+                                        <strong class="text-uppercase me-1" style="font-size: 0.65rem;">{{ field }}:</strong> {{ error }}
+                                    </li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small text-info text-uppercase">Location</label>
-                        {{ form.location }}
-                    </div>
-                    <div class="col-md-12" id="custom_category_wrapper" style="display: none;">
-                        <label class="form-label fw-bold small text-info text-uppercase">Specify Your Custom Category</label>
-                        {{ form.custom_category }}
-                        <div class="form-text text-dim">Please be specific about the skill you're offering.</div>
-                    </div>
-                </div>
+                    {% endif %}
+                    
+                    <!-- Section 1: Basic Info -->
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4 text-info d-flex align-items-center">
+                            <span class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 0.8rem;">1</span>
+                            Core Information
+                        </h5>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Service Title</label>
+                            {{ form.title }}
+                            <div class="form-text extra-small opacity-50">What exactly are you offering? (e.g., "Python Mock Interview Prep")</div>
+                        </div>
 
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const categorySelect = document.getElementById('id_category');
-                        const customWrapper = document.getElementById('custom_category_wrapper');
-                        const customInput = document.getElementById('id_custom_category');
-
-                        function handleCategoryChange() {
-                            if (categorySelect.value === 'other') {
-                                customWrapper.style.display = 'block';
-                                customInput.setAttribute('required', 'required');
-                                customInput.focus();
-                            } else {
-                                customWrapper.style.display = 'none';
-                                customInput.removeAttribute('required');
-                                customInput.value = ''; // Clear if hidden
-                            }
-                        }
-
-                        categorySelect.addEventListener('change', handleCategoryChange);
-                        handleCategoryChange(); // Run on load
-                    });
-                </script>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small text-info text-uppercase">Price Type</label>
-                        {{ form.price_type }}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small text-info text-uppercase">Price (Optional)</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-info">₹</span>
-                            {{ form.price }}
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Category</label>
+                                {{ form.category }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Location / Venue</label>
+                                {{ form.location }}
+                            </div>
+                            <div class="col-12" id="custom_category_wrapper" style="display: none;">
+                                <div class="p-3 rounded-4 bg-info bg-opacity-10 border border-info border-opacity-25">
+                                    <label class="form-label small fw-bold text-info text-uppercase tracking-wider">Specify Your Custom Category</label>
+                                    {{ form.custom_category }}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="mb-5">
-                    <label class="form-label fw-bold small text-info text-uppercase">Detailed Description</label>
-                    {{ form.description }}
-                </div>
+                    <!-- Section 2: Details & Media -->
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4 text-info d-flex align-items-center">
+                            <span class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 0.8rem;">2</span>
+                            Description & Gallery
+                        </h5>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Detailed Description</label>
+                            {{ form.description }}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Service Image (Optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-secondary bg-opacity-20 border-0 text-dim"><i class="fas fa-camera"></i></span>
+                                {{ form.image }}
+                            </div>
+                            <div class="form-text extra-small opacity-50">Upload an image to make your service more attractive.</div>
+                        </div>
+                    </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold">Publish Service</button>
-                    <a href="{% url 'home' %}" class="btn btn-link text-dim text-decoration-none">Back to Marketplace</a>
-                </div>
-            </form>
+                    <!-- Section 3: Pricing -->
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4 text-info d-flex align-items-center">
+                            <span class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 0.8rem;">3</span>
+                            Pricing Model
+                        </h5>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Payment Type</label>
+                                {{ form.payment_type }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-secondary bg-opacity-20 border-0 text-info">₹</span>
+                                    {{ form.price }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Logistics & Timeline -->
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-4 text-info d-flex align-items-center">
+                            <span class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 0.8rem;">4</span>
+                            Logistics & Timeline
+                        </h5>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Accepted Payment Method</label>
+                                {{ form.payment_method }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Delivery Timeframe</label>
+                                {{ form.delivery_time }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3 pt-4 border-top border-secondary border-opacity-25">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold py-3">
+                            <i class="fas fa-check-circle me-2"></i>Publish Service Listing
+                        </button>
+                        <a href="{% url 'home' %}" class="btn btn-link text-dim text-decoration-none small">
+                            <i class="fas fa-arrow-left me-2"></i>Discard and go back
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Category Toggle
+        const categorySelect = document.getElementById('id_category');
+        const customWrapper = document.getElementById('custom_category_wrapper');
+        const customInput = document.getElementById('id_custom_category');
+
+        function toggleCustomCategory() {
+            if (categorySelect.value === 'other') {
+                customWrapper.style.display = 'block';
+                customInput.setAttribute('placeholder', 'e.g. Logo Design, Yoga Classes');
+                customInput.focus();
+            } else {
+                customWrapper.style.display = 'none';
+                customInput.value = '';
+            }
+        }
+
+        categorySelect.addEventListener('change', toggleCustomCategory);
+        toggleCustomCategory(); // Initial state
+
+        // Price Toggle Logic
+        const paymentTypeSelect = document.getElementById('id_payment_type');
+        const priceField = document.getElementById('id_price');
+        const priceFieldWrapper = priceField.closest('.col-md-6');
+
+        function updatePriceFieldVisibility() {
+            if (paymentTypeSelect.value === 'paid') {
+                priceFieldWrapper.style.display = 'block';
+                priceField.required = true;
+            } else {
+                priceFieldWrapper.style.display = 'none';
+                priceField.value = '';
+                priceField.required = false;
+            }
+        }
+
+        if (paymentTypeSelect && priceField) {
+            paymentTypeSelect.addEventListener('change', updatePriceFieldVisibility);
+            updatePriceFieldVisibility(); // Run once on load to set initial state
+        }
+    });
+</script>
 {% endblock %}
+

@@ -18,17 +18,21 @@
 <div class="row">
     <!-- Sidebar Filters -->
     <div class="col-md-3 mb-4">
-        <div class="card p-3">
-            <h5 class="mb-3"><i class="fas fa-filter me-2 text-info"></i>Categories</h5>
-            <div class="list-group list-group-flush">
-                <a href="{% url 'requests_hub' %}" class="list-group-item list-group-item-action bg-transparent text-white border-0 {% if not category %}active fw-bold text-info{% endif %}">
-                    All Categories
-                </a>
-                {% for cat_id, cat_name in categories %}
-                    <a href="?category={{ cat_id }}" class="list-group-item list-group-item-action bg-transparent text-white border-0 {% if category == cat_id %}active fw-bold text-info{% endif %}">
-                        {{ cat_name }}
+        <div class="card border-0 shadow-sm overflow-hidden" style="background: rgba(255, 193, 7, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 193, 7, 0.1) !important;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4 d-flex align-items-center">
+                    <i class="fas fa-filter me-2 text-warning"></i>Categories
+                </h5>
+                <div class="list-group list-group-flush gap-2">
+                    <a href="{% url 'requests_hub' %}" class="list-group-item list-group-item-action border-0 rounded-3 px-3 py-2 bg-transparent text-white {% if not category %}active bg-warning bg-opacity-10 text-warning fw-bold{% endif %}">
+                        <i class="fas fa-th-large me-2 small"></i>All Needs
                     </a>
-                {% endfor %}
+                    {% for cat_id, cat_name in categories %}
+                        <a href="?category={{ cat_id }}" class="list-group-item list-group-item-action border-0 rounded-3 px-3 py-2 bg-transparent text-white {% if category == cat_id %}active bg-warning bg-opacity-10 text-warning fw-bold{% endif %}">
+                            <i class="fas fa-chevron-right me-2 small opacity-50"></i>{{ cat_name }}
+                        </a>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
@@ -38,33 +42,45 @@
         <div class="row g-4">
             {% for req in requests %}
                 <div class="col-lg-6">
-                    <div class="card h-100 p-3" style="border-left: 4px solid var(--accent-color);">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge bg-secondary shadow-sm">{{ req.get_category_display }}</span>
-                            <span class="text-warning fw-bold">
-                                {{ req.budget|default:"Negotiable" }}
-                            </span>
-                        </div>
-                        <h4 class="card-title fw-bold">{{ req.title }}</h4>
-                        <p class="card-text text-secondary">{{ req.description|truncatewords:20 }}</p>
-                        
-                        <div class="mt-auto pt-3 d-flex align-items-center justify-content-between border-top border-secondary">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-user-circle me-2 fs-4 text-dim"></i>
-                                <span class="small fw-semibold">{{ req.requester.username }}</span>
+                    <div class="card h-100 border-0 shadow-sm border-start border-warning border-4 bg-card">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge-premium" style="background: rgba(255,193,7, 0.1); color: #ffc107; font-size: 0.7rem;">{{ req.get_category_display }}</span>
+                                <span class="text-warning fw-bold small">
+                                    {{ req.budget|default:"Negotiable" }}
+                                </span>
                             </div>
-                            <span class="small text-dim">{{ req.created_at|date:"M d" }}</span>
+                            
+                            <h4 class="card-title fw-bold mb-3 text-white">{{ req.title }}</h4>
+                            <p class="card-text text-dim small mb-4 flex-grow-1" style="line-height: 1.6;">{{ req.description|truncatewords:25 }}</p>
+                            
+                            <div class="mt-auto pt-3 border-top border-secondary border-opacity-10 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-2 bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        <i class="fas fa-user-graduate text-warning extra-small"></i>
+                                    </div>
+                                    <div>
+                                        <div class="extra-small fw-bold text-white">@{{ req.requester.username }}</div>
+                                        <div class="extra-small text-dim opacity-75">{{ req.created_at|date:"M d, Y" }}</div>
+                                    </div>
+                                </div>
+                                <a href="{% url 'profile' req.requester.username %}" class="btn btn-sm btn-warning fw-bold text-dark rounded-pill px-3" style="font-size: 0.7rem;">Help Out</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% empty %}
                 <div class="col-12 text-center py-5">
-                    <i class="fas fa-bullhorn mb-3 fs-1 text-dim"></i>
-                    <h3>No requests yet.</h3>
-                    <p class="text-secondary">Be the first to ask for help!</p>
+                    <div class="bg-warning bg-opacity-10 rounded-pill d-inline-block p-4 mb-4">
+                        <i class="fas fa-bullhorn mb-0 fs-1 text-warning"></i>
+                    </div>
+                    <h3 class="fw-bold">No requests yet.</h3>
+                    <p class="text-dim">Be the first to ask for help!</p>
+                    <a href="{% url 'post_request' %}" class="btn btn-warning fw-bold text-dark mt-3">Post a Request</a>
                 </div>
             {% endfor %}
         </div>
     </div>
 </div>
+
 {% endblock %}

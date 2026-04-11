@@ -1,73 +1,69 @@
 {% extends 'base.html' %}
 
-{% block title %}SkillHub - Your Inbox{% endblock %}
+{% block title %}SkillHub - Sent Messages{% endblock %}
 
 {% block content %}
 <div class="row mb-5">
     <div class="col-lg-12">
-        <h1 class="display-5 fw-bold mb-3">Messages</h1>
-        <p class="text-secondary fs-5">Direct inquiries from fellow students.</p>
+        <h1 class="display-5 fw-bold mb-3">Sent Messages</h1>
+        <p class="text-secondary fs-5">Your outreach to fellow students.</p>
     </div>
 </div>
 
 <div class="row">
     <div class="col-lg-8 mx-auto">
         {% for item in items %}
-            <div class="card p-3 mb-4 border-secondary border-opacity-25 shadow-sm">
+            <div class="card p-3 mb-4 border-secondary border-opacity-25 shadow-sm opacity-75">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-{% if item.service %}calendar-check text-warning{% else %}envelope text-info{% endif %} me-3 fs-3 opacity-75"></i>
+                        <i class="fas fa-{% if item.service %}calendar-check text-warning{% else %}paper-plane text-info{% endif %} me-3 fs-4"></i>
                         <div>
-                            <span class="fw-bold text-white fs-5">
-                                {% if item.sender == user %}To @{{ item.receiver.username }}{% else %}From @{{ item.sender.username }}{% endif %}
-                            </span>
+                            <span class="fw-bold text-white fs-6">Sent to @{{ item.receiver.username }}</span>
                             {% if item.service %}
-                                <div class="small text-warning fw-bold">SERVICE REQUEST: {{ item.service.title }}</div>
+                                <div class="extra-small text-warning">REQ: {{ item.service.title }}</div>
                             {% endif %}
                         </div>
                     </div>
                     <span class="extra-small text-dim">{{ item.timestamp|default:item.created_at|date:"M d, Y H:i" }}</span>
                 </div>
-                <div class="p-4 bg-dark bg-opacity-25 rounded-4 border border-secondary border-opacity-10 shadow-inner">
-                    <p class="mb-0 text-main" style="line-height: 1.7;">{{ item.message }}</p>
+                <div class="p-3 bg-dark bg-opacity-25 rounded-4 border border-secondary border-opacity-10">
+                    <p class="mb-0 small text-main">{{ item.message }}</p>
                     {% if item.service %}
-                        <div class="mt-3 pt-3 border-top border-secondary border-opacity-10">
-                            <span class="badge bg-{% if item.status == 'pending' %}warning{% elif item.status == 'accepted' %}success{% else %}danger{% endif %} text-dark fw-bold">
-                                Status: {{ item.status|upper }}
-                            </span>
+                        <div class="mt-2 pt-2 border-top border-secondary border-opacity-10 d-flex justify-content-between">
+                            <span class="extra-small text-dim">Status: <span class="text-{% if item.status == 'pending' %}warning{% elif item.status == 'accepted' %}success{% else %}danger{% endif %} fw-bold">{{ item.status|upper }}</span></span>
                         </div>
                     {% endif %}
                 </div>
             </div>
         {% empty %}
             <div class="text-center py-5 bg-secondary bg-opacity-5 rounded-4 border border-dashed border-secondary border-opacity-10 mb-5">
-                <i class="fas fa-comment-slash mb-4 fs-1 text-dim opacity-25"></i>
-                <h3 class="fw-bold text-white">No messages or requests yet.</h3>
-                <p class="text-dim mb-4">When students coordinate on skills, their history appear here.</p>
-                <a href="{% url 'home' %}" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm">Explore Marketplace</a>
+                <i class="fas fa-paper-plane mb-4 fs-1 text-dim opacity-25"></i>
+                <h3 class="fw-bold text-white">No sent messages.</h3>
+                <p class="text-dim mb-4">Start reaching out to fellow students to find or offer skills!</p>
+                <a href="{% url 'home' %}" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm">Start Exploring</a>
             </div>
 
             <!-- Recent Services Suggestion -->
             <div class="mt-5">
-                <h4 class="fw-bold mb-4 text-white"><i class="fas fa-sparkles text-warning me-2"></i>You might be interested in...</h4>
+                <h4 class="fw-bold mb-4 text-white"><i class="fas fa-rocket text-info me-2"></i>Discover New Skills</h4>
                 <div class="row g-4">
                     {% for service in recent_services %}
                         <div class="col-md-6">
-                            <div class="card shadow-sm">
+                            <div class="card shadow-sm border-0" style="background: rgba(30, 41, 59, 0.4);">
                                 <div class="card-body p-3 d-flex align-items-center">
-                                    <div class="flex-shrink-0" style="width: 60px; height: 60px;">
+                                    <div class="flex-shrink-0" style="width: 50px; height: 50px;">
                                         {% if service.image %}
                                             <img src="{{ service.image.url }}" class="w-100 h-100 object-fit-cover rounded-3">
                                         {% else %}
                                             <div class="w-100 h-100 bg-dark rounded-3 d-flex align-items-center justify-content-center">
-                                                <i class="fas fa-tools text-dim small"></i>
+                                                <i class="fas fa-tools text-dim extra-small"></i>
                                             </div>
                                         {% endif %}
                                     </div>
                                     <div class="ms-3 flex-grow-1">
-                                        <h6 class="fw-bold mb-1 text-white text-truncate-1">{{ service.title }}</h6>
+                                        <h6 class="fw-bold mb-1 text-white text-truncate-1" style="font-size: 0.85rem;">{{ service.title }}</h6>
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="extra-small text-info fw-bold">@{{ service.author.username }}</span>
+                                            <span class="extra-small text-info">@{{ service.author.username }}</span>
                                             <span class="price">
                                                 <i class="fas fa-tag"></i>
                                                 {% if service.payment_type == 'free' %}Free
@@ -76,7 +72,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <a href="{% url 'service_detail' service.pk %}" class="btn btn-sm btn-outline-info rounded-pill ms-2">View</a>
+                                    <a href="{% url 'service_detail' service.pk %}" class="btn btn-sm btn-link text-info text-decoration-none fw-bold p-0">View</a>
                                 </div>
                             </div>
                         </div>

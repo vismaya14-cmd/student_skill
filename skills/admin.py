@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, ServicePost, ServiceRequest, Message, Review
+from .models import UserProfile, ServicePost, ServiceRequest, Message, Review, ServiceBooking
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -8,9 +8,15 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(ServicePost)
 class ServicePostAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'category', 'price_type', 'location', 'created_at']
-    list_filter = ['category', 'price_type']
+    list_display = ['title', 'author', 'category', 'payment_type', 'location', 'created_at']
+    list_filter = ['category', 'payment_type']
     search_fields = ['title', 'description', 'author__username', 'location']
+
+@admin.register(ServiceBooking)
+class ServiceBookingAdmin(admin.ModelAdmin):
+    list_display = ['service', 'sender', 'receiver', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['service__title', 'sender__username', 'receiver__username', 'message']
 
 @admin.register(ServiceRequest)
 class ServiceRequestAdmin(admin.ModelAdmin):
@@ -20,9 +26,9 @@ class ServiceRequestAdmin(admin.ModelAdmin):
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ['sender', 'recipient', 'timestamp', 'is_read']
+    list_display = ['sender', 'receiver', 'service', 'timestamp', 'is_read']
     list_filter = ['is_read', 'timestamp']
-    search_fields = ['content', 'sender__username', 'recipient__username']
+    search_fields = ['message', 'sender__username', 'receiver__username']
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):

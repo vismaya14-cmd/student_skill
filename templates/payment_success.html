@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Successful - SkillHub{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="row justify-content-center py-5">
+        <div class="col-md-6 text-center">
+            <!-- Success Animation Container -->
+            <div class="mb-5">
+                <div class="success-checkmark mx-auto">
+                    <div class="check-icon">
+                        <span class="icon-line line-tip"></span>
+                        <span class="icon-line line-long"></span>
+                        <div class="icon-circle"></div>
+                        <div class="icon-fix"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h1 class="display-5 fw-bold text-white mb-3">Payment Successful</h1>
+            <p class="fs-5 text-dim mb-5">Your payment of <strong>₹{{ payment.amount|floatformat:0 }}</strong> has been successfully processed.</p>
+
+            <div class="card bg-card border border-secondary border-opacity-10 rounded-4 p-4 text-start mb-5 shadow">
+                <h6 class="fw-bold mb-4 text-white text-uppercase small tracking-widest">Transaction Details</h6>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-dim">Transaction ID</span>
+                    <span class="text-white fw-medium">#SKL{{ payment.pk|add:10000 }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-dim">Service Name</span>
+                    <span class="text-white fw-medium">{{ payment.service.title }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-dim">Amount Paid</span>
+                    <span class="text-white fw-medium">₹{{ payment.amount|floatformat:0 }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-dim">Payment Method</span>
+                    <span class="text-white fw-medium text-uppercase">{{ payment.get_payment_method_display }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-dim">Status</span>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3">Success</span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-4 py-3 fw-bold flex-fill" style="max-width: 250px;">Go to Services</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill px-4 py-3 fw-bold flex-fill" style="max-width: 250px;">My Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /** Checkmark Animation **/
+    .success-checkmark {
+        width: 80px;
+        height: 115px;
+        margin: 0 auto;
+    }
+    .check-icon {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        border-radius: 50%;
+        box-sizing: content-box;
+        border: 4px solid #4CAF50;
+    }
+    .check-icon::before {
+        top: 3px;
+        left: -2px;
+        width: 30px;
+        transform-origin: 100% 50%;
+        border-radius: 100px 0 0 100px;
+    }
+    .check-icon::after {
+        top: 0;
+        left: 30px;
+        width: 60px;
+        transform-origin: 0 50%;
+        border-radius: 0 100px 100px 0;
+        animation: rotate-circle 4.25s ease-in;
+    }
+    .icon-line {
+        height: 5px;
+        background-color: #4CAF50;
+        display: block;
+        border-radius: 2px;
+        position: absolute;
+        z-index: 10;
+    }
+    .line-tip {
+        top: 46px;
+        left: 14px;
+        width: 25px;
+        transform: rotate(45deg);
+        animation: icon-line-tip 0.75s;
+    }
+    .line-long {
+        top: 38px;
+        right: 8px;
+        width: 47px;
+        transform: rotate(-45deg);
+        animation: icon-line-long 0.75s;
+    }
+    @keyframes icon-line-tip {
+        0% { width: 0; left: 1px; top: 19px; }
+        54% { width: 0; left: 1px; top: 19px; }
+        70% { width: 50px; left: -8px; top: 37px; }
+        84% { width: 17px; left: 21px; top: 48px; }
+        100% { width: 25px; left: 14px; top: 46px; }
+    }
+    @keyframes icon-line-long {
+        0% { width: 0; right: 46px; top: 54px; }
+        65% { width: 0; right: 46px; top: 54px; }
+        84% { width: 55px; right: 0px; top: 35px; }
+        100% { width: 47px; right: 8px; top: 38px; }
+    }
+</style>
+{% endblock %}
