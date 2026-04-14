@@ -18,11 +18,11 @@
             <div class="col-lg-12">
                 <form class="card p-4 bg-white border border-dark border-opacity-10 rounded-4 shadow-sm" action="{% url 'search' %}" method="get">
                     <div class="row g-3 align-items-end">
-                        <div class="col-md-5">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Keyword</label>
                             <input type="text" name="q" class="form-control" placeholder="Searching for..." value="{{ query }}">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Category</label>
                             <select name="category" class="form-select">
                                 <option value="">All Expertise</option>
@@ -30,6 +30,10 @@
                                     <option value="{{ cat_val }}" {% if selected_category == cat_val %}selected{% endif %}>{{ cat_name }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Max Price (₹)</label>
+                            <input type="number" name="max_price" class="form-control" placeholder="Any" value="{{ max_price }}">
                         </div>
                         <div class="col-md-3">
                             <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow-sm">
@@ -60,8 +64,15 @@
                                             <i class="fas fa-tools opacity-50 fs-1 text-primary"></i>
                                         </div>
                                     {% endif %}
-                                    <div class="position-absolute top-0 end-0 p-3">
+                                    <div class="position-absolute top-0 end-0 p-3 d-flex justify-content-between w-100">
                                         <span class="badge-blue px-2 py-1 rounded small fw-bold">{{ service.get_category_display }}</span>
+                                        {% if service.avg_rating %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-star me-1"></i>
+                                            {{ service.avg_rating|floatformat:1 }}
+                                            <span class="ms-1 extra-small opacity-75">({{ service.reviews.count }})</span>
+                                        </span>
+                                        {% endif %}
                                     </div>
                                 </div>
 

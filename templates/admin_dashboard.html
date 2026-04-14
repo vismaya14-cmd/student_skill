@@ -1,0 +1,123 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Admin Dashboard - SkillHub{% endblock %}
+
+{% block dashboard_content %}
+<div class="admin-dashboard">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Platform Overview</h2>
+            <p class="text-secondary small">System statistics and revenue tracking</p>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary bg-opacity-10 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-primary mb-1 fw-bold text-uppercase small tracking-wider">Total Users</p>
+                        <h2 class="fw-800 text-dark mb-0">{{ users_count }}</h2>
+                    </div>
+                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
+                        <i class="fas fa-users fs-5 text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-success bg-opacity-10 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-success mb-1 fw-bold text-uppercase small tracking-wider">Services</p>
+                        <h2 class="fw-800 text-dark mb-0">{{ services_count }}</h2>
+                    </div>
+                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
+                        <i class="fas fa-layer-group fs-5 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-warning bg-opacity-10 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-warning text-darken mb-1 fw-bold text-uppercase small tracking-wider">Transactions</p>
+                        <h2 class="fw-800 text-dark mb-0">{{ requests_count }}</h2>
+                    </div>
+                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
+                        <i class="fas fa-exchange-alt fs-5 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-info bg-opacity-10 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-info mb-1 fw-bold text-uppercase small tracking-wider">Total Revenue</p>
+                        <h2 class="fw-800 text-dark mb-0">₹{{ total_revenue|floatformat:0 }}</h2>
+                    </div>
+                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
+                        <i class="fas fa-rupee-sign fs-5 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header border-0 bg-white pt-4 pb-3 px-4">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-user-plus text-primary me-2"></i>Recent Signups</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for user in recent_users %}
+                        <li class="list-group-item px-4 border-light py-3 d-flex align-items-center">
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-user text-secondary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ user.username }}</h6>
+                                <small class="text-muted">Joined {{ user.date_joined|date:"M d, Y" }}</small>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header border-0 bg-white pt-4 pb-3 px-4">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-wallet text-success me-2"></i>Recent Payments</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for payment in recent_payments %}
+                        <li class="list-group-item px-4 border-light py-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-check text-success"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">₹{{ payment.amount|floatformat:0 }}</h6>
+                                    <small class="text-muted">By @{{ payment.user.username }}</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-secondary border">{{ payment.payment_method|upper }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item px-4 border-light py-4 text-center text-muted">No recent payments</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

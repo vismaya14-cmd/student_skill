@@ -87,15 +87,19 @@
                         <div class="col">
                             <h3 class="fw-bold mb-0">Student Reviews</h3>
                             <div class="d-flex align-items-center mt-2">
-                                <div class="text-warning me-2">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <div class="me-2 d-flex">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= avg_rating %}
+                                            <i class="fas fa-star star-filled"></i>
+                                        {% elif forloop.counter|add:"-0.5" <= avg_rating %}
+                                            <i class="fas fa-star-half-alt star-filled"></i>
+                                        {% else %}
+                                            <i class="far fa-star star-empty"></i>
+                                        {% endif %}
+                                    {% endfor %}
                                 </div>
-                                <span class="text-dark fw-bold">{{ avg_rating|floatformat:1 }} / 5.0</span>
-                                <span class="text-secondary ms-2">({{ reviews|length }} reviews)</span>
+                                <span class="text-dark fw-bold">{{ avg_rating|floatformat:1 }}</span>
+                                <span class="text-secondary ms-2 small">({{ reviews|length }} reviews)</span>
                             </div>
                         </div>
                         {% if can_review %}
@@ -109,20 +113,36 @@
 
                     {% if can_review %}
                     <div class="collapse mb-5" id="reviewForm">
-                        <div class="card bg-card border border-warning border-opacity-25 p-4 rounded-4 shadow-lg">
-                            <h5 class="fw-bold mb-3">Verified Review</h5>
+                        <div class="card bg-card border border-warning border-opacity-25 p-4 rounded-4 shadow-lg text-center">
+                            <h4 class="fw-800 mb-2">How was your experience?</h4>
+                            <p class="text-muted small mb-4">Your review helps other students find quality services.</p>
+                            
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="add_review" value="1">
-                                <div class="mb-3">
-                                    <label class="form-label text-warning small fw-bold">RATING (1-5)</label>
-                                    {{ review_form.rating }}
-                                </div>
+                                
                                 <div class="mb-4">
-                                    <label class="form-label text-warning small fw-bold">YOUR FEEDBACK</label>
-                                    {{ review_form.comment }}
+                                    <div class="star-rating-form d-flex justify-content-center">
+                                        <input type="radio" id="star5" name="rating" value="5" />
+                                        <label for="star5" title="5 stars"><i class="far fa-star"></i></label>
+                                        <input type="radio" id="star4" name="rating" value="4" />
+                                        <label for="star4" title="4 stars"><i class="far fa-star"></i></label>
+                                        <input type="radio" id="star3" name="rating" value="3" />
+                                        <label for="star3" title="3 stars"><i class="far fa-star"></i></label>
+                                        <input type="radio" id="star2" name="rating" value="2" />
+                                        <label for="star2" title="2 stars"><i class="far fa-star"></i></label>
+                                        <input type="radio" id="star1" name="rating" value="1" />
+                                        <label for="star1" title="1 star"><i class="far fa-star"></i></label>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-warning fw-bold w-100 py-3 text-dark">Submit Verified Review</button>
+
+                                <div class="mb-4">
+                                    <textarea name="comment" class="form-control rounded-4 p-3" rows="4" placeholder="Describe the quality, communication, and speed..." required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-warning fw-bold w-100 py-3 text-dark rounded-pill shadow-sm">
+                                    Submit Verified Review
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -138,24 +158,24 @@
                 <div class="row g-4">
                     {% for review in reviews %}
                         <div class="col-md-6">
-                            <div class="card bg-card border border-dark border-opacity-10 p-4 rounded-4 shadow-sm">
+                            <div class="review-card-premium">
                                 <div class="d-flex justify-content-between mb-3">
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-sm bg-warning bg-opacity-10 p-2 me-3 rounded-circle">
-                                            <i class="fas fa-user-circle text-warning fs-5"></i>
+                                        <div class="avatar-sm avatar-gold p-2 me-3 rounded-circle d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-user text-white"></i>
                                         </div>
                                         <div>
-                                            <h6 class="fw-bold mb-0 text-dark">@{ {{ review.author.username }} }</h6>
-                                            <small class="text-dark-50">{{ review.created_at|date:"M d, Y" }}</small>
+                                            <h6 class="review-author-name mb-0">@{{ review.user.username }}</h6>
+                                            <small class="review-date">{{ review.created_at|date:"M d, Y" }}</small>
                                         </div>
                                     </div>
-                                    <div class="text-warning">
+                                    <div class="d-flex gap-1">
                                         {% for i in "12345" %}
-                                            <i class="fa{% if forloop.counter <= review.rating %}s{% else %}r{% endif %} fa-star extra-small"></i>
+                                            <i class="fas fa-star {% if forloop.counter <= review.rating %}review-gold-star{% else %}text-light{% endif %}"></i>
                                         {% endfor %}
                                     </div>
                                 </div>
-                                <p class="mb-0 text-dark-50 small italic" style="line-height: 1.6;">"{{ review.comment }}"</p>
+                                <p class="review-comment-text mb-0">"{{ review.comment }}"</p>
                             </div>
                         </div>
                     {% empty %}

@@ -119,5 +119,46 @@
         width: 18px;
         height: 18px;
     }
+    
+    #gateway-simulator {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(255, 255, 255, 0.9);
+        z-index: 9999;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
 </style>
+
+<div id="gateway-simulator">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <h4 class="mt-4 fw-bold text-dark" id="gateway-text">Connecting to Secure Gateway...</h4>
+    <p class="text-secondary small">Please do not close or refresh this window.</p>
+</div>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const overlay = document.getElementById('gateway-simulator');
+        const textArea = document.getElementById('gateway-text');
+        overlay.style.display = 'flex';
+        
+        setTimeout(() => {
+            textArea.innerText = "Authenticating Transaction...";
+        }, 1500);
+        
+        setTimeout(() => {
+            textArea.innerText = "Payment Successful! Redirecting...";
+            textArea.classList.replace('text-dark', 'text-success');
+        }, 3000);
+        
+        setTimeout(() => {
+            this.submit();
+        }, 4000);
+    });
+</script>
 {% endblock %}

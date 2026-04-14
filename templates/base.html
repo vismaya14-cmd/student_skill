@@ -44,18 +44,31 @@
 
                 <ul class="navbar-nav align-items-center gap-3">
                     {% if user.is_authenticated %}
+                        <li class="nav-item me-3 d-flex align-items-center">
+                            <a href="{% url 'inbox' %}" class="nav-link position-relative px-2">
+                                <i class="fas fa-bell fs-5 text-secondary"></i>
+                                {% if unread_notifications_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                                    {{ unread_notifications_count }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userNav" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle fs-5 me-2 text-secondary"></i> {{ user.username }}
+                                <i class="fas fa-user-circle fs-5 me-2 text-primary"></i> <span class="fw-bold">{{ user.username }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2">
-                                <li><a class="dropdown-item py-2" href="{% url 'dashboard' %}"><i class="fas fa-th-large me-2"></i> Dashboard</a></li>
-                                <li><a class="dropdown-item py-2" href="{% url 'profile' user.username %}"><i class="fas fa-user me-2"></i> Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2">
+                                <li><a class="dropdown-item py-2 fw-medium" href="{% url 'dashboard' %}"><i class="fas fa-th-large me-3 text-secondary"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item py-2 fw-medium" href="{% url 'profile' user.username %}"><i class="fas fa-user me-3 text-secondary"></i> Profile</a></li>
+                                {% if request.user.is_staff %}
+                                <li><a class="dropdown-item py-2 fw-medium text-purple" href="{% url 'admin_panel' %}"><i class="fas fa-hammer me-3 text-purple"></i> Admin Panel</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider opacity-50"></li>
                                 <li>
                                     <form action="{% url 'logout' %}" method="post" class="m-0">
                                         {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger fw-bold"><i class="fas fa-sign-out-alt me-2"></i> Logout</button>
+                                        <button type="submit" class="dropdown-item text-danger fw-bold"><i class="fas fa-sign-out-alt me-3"></i> Logout</button>
                                     </form>
                                 </li>
                             </ul>

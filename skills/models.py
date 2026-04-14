@@ -33,6 +33,17 @@ class UserProfile(models.Model):
             return [s.strip() for s in self.skills_offered.split(',')]
         return []
 
+    # --- BADGE SYSTEM ---
+    @property
+    def is_top_seller(self):
+        # Top seller if completed >= 5 jobs
+        return self.user.received_requests.filter(status='completed').count() >= 5
+        
+    @property
+    def is_fast_responder(self):
+        # Fast responder if they have 100% acceptance or responded to > 3 requests
+        return self.user.sent_messages.count() > 2
+
     def __str__(self):
         return f'{self.user.username} Profile'
 
@@ -84,6 +95,18 @@ class Service(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def avg_rating(self):
+        if hasattr(self, '_avg_rating'):
+            return self._avg_rating
+        from django.db.models import Avg
+        avg = self.reviews.aggregate(Avg('rating'))['rating__avg']
+        return avg if avg else 0
+
+    @avg_rating.setter
+    def avg_rating(self, value):
+        self._avg_rating = value
+
 class HelpRequest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='help_requests')
     title = models.CharField(max_length=200)
@@ -109,9 +132,10 @@ class Request(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
-        ('completed', 'Completed'),
         ('paid', 'Paid'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('rejected', 'Rejected'),
     ]
     
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_requests')
@@ -119,6 +143,14 @@ class Request(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='requests')
     message = models.TextField(blank=True, null=True)
     payment = models.OneToOneField('Payment', on_delete=models.SET_NULL, null=True, blank=True, related_name='booking')
+    
+    # --- FILE UPLOAD FEATURE ---
+    requirement_file = models.FileField(upload_to='requirements/', blank=True, null=True, help_text="Added by requester")
+    delivery_file = models.FileField(upload_to='deliveries/', blank=True, null=True, help_text="Added by provider")
+    
+    # --- MEETING SUPPORT ---
+    meeting_link = models.URLField(blank=True, null=True, help_text="Video meeting link like Zoom/Meet")
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -157,7 +189,7 @@ class Message(models.Model):
         return f"From {self.sender} to {self.receiver} regarding {self.service}"
 
 class Review(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='author_id')
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='reviews')
     rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
     comment = models.TextField()
@@ -165,6 +197,7 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        unique_together = ('user', 'service')
 
 
 class Payment(models.Model):
@@ -186,6 +219,10 @@ class Payment(models.Model):
         max_length=20,
         choices=[('upi', 'UPI'), ('card', 'Card'), ('cash', 'Cash')]
     )
+    # --- PAYMENT INTEGRATION ---
+    transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    gateway = models.CharField(max_length=50, default='simulator', help_text='Stripe, Razorpay, Simulator')
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 

@@ -32,9 +32,9 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['service', 'author', 'rating', 'created_at']
+    list_display = ['service', 'user', 'rating', 'created_at']
     list_filter = ['rating', 'created_at']
-    search_fields = ['comment', 'author__username', 'service__title']
+    search_fields = ['comment', 'user__username', 'service__title']
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):

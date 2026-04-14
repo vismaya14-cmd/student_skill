@@ -36,6 +36,14 @@ def create_status_notification(sender, instance, **kwargs):
         title = "Request Accepted! 🎉"
         target_user = instance.sender
         msg = f"Your request for '{instance.service.title}' has been accepted."
+    elif instance.status == 'paid':
+        title = "Payment Received! 💳"
+        target_user = instance.receiver
+        msg = f"Payment for '{instance.service.title}' has been confirmed."
+    elif instance.status == 'in_progress':
+        title = "Service In Progress 🚀"
+        target_user = instance.sender
+        msg = f"Your service '{instance.service.title}' is now in progress."
     elif instance.status == 'rejected':
         title = "Request Declined"
         target_user = instance.sender

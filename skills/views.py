@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Avg, Sum, Count
@@ -12,15 +14,34 @@ from .forms import UserRegisterForm, UserProfileForm, ServiceForm, HelpRequestFo
 
 def home(request):
     category = request.GET.get('category')
-    services = Service.objects.all()
+    services = Service.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-created_at')
+    
     if category:
         services = services.filter(category=category)
-    
+        
+    # --- AI RECOMMENDATION LOGIC ---
+    recommended_services = []
+    if request.user.is_authenticated:
+        user_profile = getattr(request.user, 'profile', None)
+        if user_profile and user_profile.skills_offered:
+            # Recommend services that complement their skills or are highly rated
+            user_skills = [s.strip().lower() for s in user_profile.skills_offered.split(',')]
+            recommended_services = Service.objects.annotate(
+                avg_rating=Avg('reviews__rating')
+            ).filter(avg_rating__gte=4.0).exclude(user=request.user).order_by('-avg_rating')[:4]
+            
+        if not recommended_services:
+            # Fallback based on location
+            if user_profile and user_profile.location:
+                recommended_services = Service.objects.annotate(
+                    avg_rating=Avg('reviews__rating')
+                ).filter(location__icontains=user_profile.location).exclude(user=request.user)[:4]
+
     context = {
         'services': services,
         'category': category,
-        'categories': CATEGORY_CHOICES
-
+        'categories': CATEGORY_CHOICES,
+        'recommended_services': recommended_services
     }
     return render(request, 'home.html', context)
 
@@ -148,8 +169,12 @@ def service_detail(request, pk):
     if request.user.is_authenticated:
         user_booking = Request.objects.filter(service=service, sender=request.user).exclude(status='rejected').last() if request.user.is_authenticated else None
     
-    # Check if user can review (must have a completed request)
-    can_review = Request.objects.filter(service=service, sender=request.user, status='completed').exists() if request.user.is_authenticated else False
+    # Check if user can review (must have a completed request AND hasn't reviewed yet)
+    can_review = False
+    if request.user.is_authenticated:
+        has_completed = Request.objects.filter(service=service, sender=request.user, status='completed').exists()
+        has_reviewed = Review.objects.filter(user=request.user, service=service).exists()
+        can_review = has_completed and not has_reviewed
 
     if request.method == 'POST':
         if 'request_service' in request.POST:
@@ -180,10 +205,15 @@ def service_detail(request, pk):
         elif 'add_review' in request.POST:
             if not request.user.is_authenticated:
                 return redirect('login')
+            
+            if Review.objects.filter(user=request.user, service=service).exists():
+                messages.error(request, 'You have already reviewed this service.')
+                return redirect('service_detail', pk=pk)
+                
             r_form = ReviewForm(request.POST)
             if r_form.is_valid():
                 rev = r_form.save(commit=False)
-                rev.author = request.user
+                rev.user = request.user
                 rev.service = service
                 rev.save()
                 messages.success(request, 'Review added!')
@@ -233,21 +263,44 @@ def reject_request(request, id):
     req.save()
     messages.warning(request, 'Request rejected.')
     return redirect('inbox')
+
+@login_required
+def add_meeting_link(request, id):
+    req = get_object_or_404(Request, id=id, receiver=request.user)
+    if req.status in ['accepted', 'paid']:
+        if request.method == 'POST':
+            link = request.POST.get('meeting_link')
+            if link:
+                req.meeting_link = link
+                req.save()
+                messages.success(request, 'Meeting link added successfully!')
+            else:
+                messages.error(request, 'Meeting link cannot be empty.')
+    else:
+        messages.error(request, 'You cannot add a meeting link at this stage.')
+    return redirect('inbox')
 @login_required
 def send_message_inbox(request, request_id):
     booking = get_object_or_404(Request, id=request_id)
     
-    # Requirement: Allow messaging ONLY if request status is 'pending' or 'accepted'
-    if booking.status not in ['pending', 'accepted']:
-        messages.error(request, "Communication is only available for active or pending inquiries.")
+    if booking.status in ['rejected', 'completed']:
+        messages.error(request, "Communication is closed for this inquiry.")
         return redirect('inbox')
         
     if request.method == 'POST':
         message_text = request.POST.get('message')
+        attachment = request.FILES.get('attachment')
+        
+        if attachment:
+            if request.user == booking.sender:
+                booking.requirement_file = attachment
+                messages.success(request, 'Requirement file uploaded!')
+            elif request.user == booking.receiver:
+                booking.delivery_file = attachment
+                messages.success(request, 'Delivery file uploaded!')
+            booking.save()
+            
         if message_text:
-            # Requirement: Implement precise student-to-student mapping
-            # If logged-in user == request.sender: receiver = request.receiver
-            # If logged-in user == request.receiver: receiver = request.sender
             if request.user == booking.sender:
                 receiver = booking.receiver
             else:
@@ -294,8 +347,9 @@ def search(request):
     query = request.GET.get('q', '')
     category = request.GET.get('category', '')
     location = request.GET.get('location', '')
+    max_price = request.GET.get('max_price', '')
     
-    results_services = Service.objects.all()
+    results_services = Service.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-created_at')
     results_requests = HelpRequest.objects.all()
     
     if query:
@@ -313,9 +367,13 @@ def search(request):
     if location:
         results_services = results_services.filter(location__icontains=location)
         
+    if max_price and max_price.isdigit():
+        results_services = results_services.filter(price__lte=max_price)
+        
     context = {
         'query': query,
         'location': location,
+        'max_price': max_price,
         'results_services': results_services,
         'results_requests': results_requests,
         'categories': CATEGORY_CHOICES,
@@ -528,3 +586,52 @@ def payment_from_request(request, request_id):
 def payment_success(request, payment_id):
     payment = get_object_or_404(Payment, pk=payment_id, user=request.user)
     return render(request, 'payment_success.html', {'payment': payment})
+
+# --- AJAX CHAT SYSTEM ---
+@login_required
+def fetch_new_messages(request, request_id):
+    booking = get_object_or_404(Request, pk=request_id)
+    if request.user != booking.sender and request.user != booking.receiver:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+    messages = Message.objects.filter(request=booking).order_by('timestamp')
+    data = []
+    for m in messages:
+        # Mark as read if user is receiver
+        if m.receiver == request.user and not m.is_read:
+            m.is_read = True
+            m.save()
+            
+        data.append({
+            'id': m.id,
+            'sender': m.sender.username,
+            'receiver': m.receiver.username,
+            'message': m.message,
+            'timestamp': m.timestamp.strftime("%b %d, %Y, %I:%M %p"),
+            'is_read': m.is_read,
+            'is_current_user': m.sender == request.user
+        })
+    return JsonResponse({'messages': data})
+
+# --- ADMIN DASHBOARD ---
+@staff_member_required
+def admin_panel(request):
+    users_count = User.objects.count()
+    services_count = Service.objects.count()
+    requests_count = Request.objects.count()
+    
+    total_revenue = Payment.objects.filter(status='success').aggregate(Sum('amount'))['amount__sum'] or 0
+    
+    recent_users = User.objects.order_by('-date_joined')[:5]
+    recent_payments = Payment.objects.filter(status='success').order_by('-timestamp')[:5]
+    
+    context = {
+        'users_count': users_count,
+        'services_count': services_count,
+        'requests_count': requests_count,
+        'total_revenue': total_revenue,
+        'recent_users': recent_users,
+        'recent_payments': recent_payments,
+    }
+    return render(request, 'admin_dashboard.html', context)
+
