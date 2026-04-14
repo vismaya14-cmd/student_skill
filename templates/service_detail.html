@@ -6,76 +6,73 @@
 <div class="row g-4">
     <!-- Main Service Info -->
     <div class="col-lg-8">
-        <div class="card border-0 shadow-lg overflow-hidden bg-card">
+        <div class="card border-0 shadow-sm overflow-hidden mb-4">
             <!-- Service Header Image -->
             {% if service.image %}
-                <div class="w-100 position-relative" style="height: 350px;">
+                <div class="w-100 bg-light" style="height: 350px;">
                     <img src="{{ service.image.url }}" class="w-100 h-100 object-fit-cover" alt="{{ service.title }}">
-                    <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.9) 100%);">
-                        <span class="badge bg-primary mb-2 shadow-sm px-3 py-2 text-uppercase fw-bold">{{ service.get_category_display }}</span>
-                        <h1 class="display-5 fw-bold mb-0 text-white">{{ service.title }}</h1>
-                    </div>
-                </div>
-            {% else %}
-                <div class="bg-secondary bg-opacity-10 p-5 text-center">
-                    <span class="badge bg-primary mb-3 shadow-sm px-3 py-2 text-uppercase fw-bold">{{ service.get_category_display }}</span>
-                    <h1 class="display-5 fw-bold mb-0 text-white">{{ service.title }}</h1>
                 </div>
             {% endif %}
 
             <div class="card-body p-4 p-md-5">
-                <div class="d-flex flex-wrap gap-5 mb-5 pb-5 border-bottom border-secondary border-opacity-10 service-meta">
+                <div class="mb-4">
+                    <span class="badge-online mb-2">{{ service.get_category_display }}</span>
+                    <h1 class="display-5 fw-bold mb-0">{{ service.title }}</h1>
+                </div>
+
+            <div class="card-body p-4 p-md-5">
+                <div class="service-detail-info-grid mb-5 pb-5 border-bottom border-dark border-opacity-5">
                     <!-- Price Item -->
-                    <div class="service-info-item d-flex align-items-center">
-                        <div class="info-icon-box bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; flex-shrink: 0;">
-                            <i class="fas fa-tag text-info-custom fs-5"></i>
+                    <div class="service-info-column">
+                        <div class="info-icon-wrapper bg-primary bg-opacity-5 border-0">
+                            <i class="fas fa-tag"></i>
                         </div>
-                        <div class="info-text">
-                            <label class="d-block small text-dim text-uppercase fw-bold mb-0">Price</label>
-                            <span class="fw-bold text-white fs-5">
+                        <div class="info-content">
+                            <p class="info-label mb-1">Price</p>
+                            <h5 class="price-text mb-0">
                                 {% if service.payment_type == 'free' %}Free
                                 {% elif service.payment_type == 'paid' %}₹{{ service.price|floatformat:0 }}
                                 {% else %}Negotiable{% endif %}
-                            </span>
+                            </h5>
                         </div>
                     </div>
 
                     <!-- Delivery Item -->
-                    <div class="service-info-item d-flex align-items-center">
-                        <div class="info-icon-box bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; flex-shrink: 0;">
-                            <i class="fas fa-shipping-fast text-success-custom fs-5"></i>
+                    <div class="service-info-column">
+                        <div class="info-icon-wrapper">
+                            <i class="fas fa-shipping-fast"></i>
                         </div>
-                        <div class="info-text">
-                            <label class="d-block small text-dim text-uppercase fw-bold mb-0">Delivery</label>
-                            <span class="fw-bold text-white fs-5">{{ service.get_delivery_time_display }}</span>
+                        <div class="info-content">
+                            <p class="info-label">Delivery</p>
+                            <h5 class="info-value">{{ service.get_delivery_time_display }}</h5>
                         </div>
                     </div>
 
                     <!-- Payment Item -->
-                    <div class="service-info-item d-flex align-items-center">
-                        <div class="info-icon-box bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; flex-shrink: 0;">
-                            <i class="fas fa-credit-card text-warning-custom fs-5"></i>
+                    <div class="service-info-column">
+                        <div class="info-icon-wrapper">
+                            <i class="fas fa-credit-card"></i>
                         </div>
-                        <div class="info-text">
-                            <label class="d-block small text-dim text-uppercase fw-bold mb-0">Payments</label>
-                            <span class="fw-bold text-white fs-5">{{ service.get_payment_method_display }}</span>
+                        <div class="info-content">
+                            <p class="info-label">Payments</p>
+                            <h5 class="info-value">{{ service.get_payment_method_display }}</h5>
                         </div>
                     </div>
 
                     <!-- Location Item -->
-                    <div class="service-info-item d-flex align-items-center">
-                        <div class="info-icon-box bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; flex-shrink: 0;">
-                            <i class="fas fa-map-marker-alt text-danger-custom fs-5"></i>
+                    <div class="service-info-column">
+                        <div class="info-icon-wrapper">
+                            <i class="fas fa-map-marker-alt"></i>
                         </div>
-                        <div class="info-text">
-                            <label class="d-block small text-dim text-uppercase fw-bold mb-0">Location</label>
-                            <span class="fw-bold text-white fs-5">{{ service.location|default:"Online / Flexible" }}</span>
+                        <div class="info-content">
+                            <p class="info-label">Location</p>
+                            <h5 class="info-value">{{ service.location|default:"Online / Flexible" }}</h5>
                         </div>
                     </div>
                 </div>
                 
-                <h4 class="fw-bold mb-4 text-white">About this service</h4>
-                <div class="fs-6 text-white mb-5" style="line-height: 1.8;">
+                <h4 class="fw-bold mb-4">About this service</h4>
+                <div class="fs-6 mb-5" style="line-height: 1.8; color: #334155;">
                     {{ service.description|linebreaks }}
                 </div>
 
@@ -84,46 +81,89 @@
                 <!-- Review Section -->
                 <div class="reviews-section">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0 text-white">Student Reviews</h4>
-                        {% if avg_rating %}
-                            <div class="d-flex align-items-center">
+                <!-- Reviews Section -->
+                <div id="reviews" class="mt-5 pt-5 border-top border-secondary border-opacity-10">
+                    <div class="row align-items-center mb-4">
+                        <div class="col">
+                            <h3 class="fw-bold mb-0">Student Reviews</h3>
+                            <div class="d-flex align-items-center mt-2">
                                 <div class="text-warning me-2">
-                                    {% for i in "12345"|make_list %}
-                                        {% if forloop.counter <= avg_rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star text-dim"></i>{% endif %}
-                                    {% endfor %}
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
                                 </div>
-                                <span class="fw-bold">{{ avg_rating|floatformat:1 }}</span>
+                                <span class="text-dark fw-bold">{{ avg_rating|floatformat:1 }} / 5.0</span>
+                                <span class="text-secondary ms-2">({{ reviews|length }} reviews)</span>
                             </div>
+                        </div>
+                        {% if can_review %}
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-warning fw-bold rounded-pill px-4 text-dark" data-bs-toggle="collapse" data-bs-target="#reviewForm">
+                                <i class="fas fa-edit me-2"></i>Write a Review
+                            </button>
+                        </div>
                         {% endif %}
                     </div>
 
-                    {% if user.is_authenticated and user != service.author %}
-                        <div class="card border-0 bg-secondary bg-opacity-10 p-4 rounded-4 mb-5">
-                            <h6 class="fw-bold mb-3">Add your experience</h6>
-                            <form method="POST">
+                    {% if can_review %}
+                    <div class="collapse mb-5" id="reviewForm">
+                        <div class="card bg-card border border-warning border-opacity-25 p-4 rounded-4 shadow-lg">
+                            <h5 class="fw-bold mb-3">Verified Review</h5>
+                            <form method="post">
                                 {% csrf_token %}
-                                {{ review_form }}
-                                <button type="submit" name="add_review" class="btn btn-primary mt-3 px-4">Post Review</button>
+                                <input type="hidden" name="add_review" value="1">
+                                <div class="mb-3">
+                                    <label class="form-label text-warning small fw-bold">RATING (1-5)</label>
+                                    {{ review_form.rating }}
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label text-warning small fw-bold">YOUR FEEDBACK</label>
+                                    {{ review_form.comment }}
+                                </div>
+                                <button type="submit" class="btn btn-warning fw-bold w-100 py-3 text-dark">Submit Verified Review</button>
                             </form>
                         </div>
+                    </div>
+                    {% elif user.is_authenticated %}
+                    <div class="alert bg-success bg-opacity-5 border border-success border-opacity-10 rounded-4 p-3 mb-5">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle text-success me-3 fs-4"></i>
+                            <p class="mb-0 text-dark small">Only users who have **completed** this service can leave a review. Check your <a href="{% url 'inbox' %}" class="text-success fw-bold">Inbox</a> to track your progress.</p>
+                        </div>
+                    </div>
                     {% endif %}
 
-                    <div class="review-list">
-                        {% for review in reviews %}
-                            <div class="mb-4 pb-4 border-bottom border-secondary border-opacity-10">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <div class="text-warning small mb-1">
-                                        {% for i in "12345"|make_list %}{% if forloop.counter <= review.rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}
+                <div class="row g-4">
+                    {% for review in reviews %}
+                        <div class="col-md-6">
+                            <div class="card bg-card border border-dark border-opacity-10 p-4 rounded-4 shadow-sm">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-warning bg-opacity-10 p-2 me-3 rounded-circle">
+                                            <i class="fas fa-user-circle text-warning fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark">@{ {{ review.author.username }} }</h6>
+                                            <small class="text-dark-50">{{ review.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="text-warning">
+                                        {% for i in "12345" %}
+                                            <i class="fa{% if forloop.counter <= review.rating %}s{% else %}r{% endif %} fa-star extra-small"></i>
+                                        {% endfor %}
                                     </div>
                                 </div>
-                                <p class="text-white small mb-0">{{ review.comment }}</p>
+                                <p class="mb-0 text-dark-50 small italic" style="line-height: 1.6;">"{{ review.comment }}"</p>
                             </div>
-                        {% empty %}
-                            <div class="text-center py-4 bg-secondary bg-opacity-5 rounded-4">
-                                <p class="text-dim small mb-0">No reviews yet.</p>
-                            </div>
-                        {% endfor %}
-                    </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center py-5">
+                            <p class="text-dark-50 italic">No reviews yet. Be the first to build this provider's reputation!</p>
+                        </div>
+                    {% endfor %}
+                </div>
                 </div>
             </div>
         </div>
@@ -131,44 +171,43 @@
 
     <!-- Sidebar: Provider Info & Contact -->
     <div class="col-lg-4">
-        <div class="card border-0 shadow-lg sticky-top" style="top: 100px;">
-            <div class="card-body p-4">
-                <div class="text-center mb-4 pb-4 border-bottom border-secondary border-opacity-10">
-                    <h5 class="fw-bold mb-1 text-white">{{ service.author.username }}</h5>
-                    <p class="text-white small mb-3">Service Provider</p>
-                    <a href="{% url 'profile' service.author.username %}" class="btn btn-sm btn-outline-info rounded-pill px-4">View Profile</a>
-                </div>
+        <div class="card border-0 shadow-sm sticky-top p-4" style="top: 100px;">
+            <div class="text-center mb-4 pb-4 border-bottom border-dark border-opacity-5">
+                <h5 class="fw-bold mb-1">{{ service.user.username }}</h5>
+                <p class="small mb-3 opacity-75">Service Provider</p>
+                <a href="{% url 'profile' service.user.username %}" class="btn btn-sm btn-outline-secondary rounded-pill px-4">View Profile</a>
+            </div>
 
-                {% if user.is_authenticated and user != service.author and service.payment_type != 'free' %}
+                {% if user.is_authenticated and user != service.user and service.payment_type != 'free' %}
                 <div class="mb-4">
-                    <a href="{% url 'payment' service.id %}" class="btn btn-primary w-100 py-3 fw-bold shadow-lg rounded-4 d-flex align-items-center justify-content-center gap-2">
-                        <i class="fas fa-credit-card fs-5 text-white"></i>
+                    <a href="{% url 'payment' service.id %}" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">
+                        <i class="fas fa-credit-card"></i>
                         Proceed to Payment
                     </a>
-                    <p class="text-center text-dim extra-small mt-2 mb-0">Secure Hyperlocal Checkout</p>
+                    <p class="text-center extra-small mt-2 mb-0 opacity-75">Secure Hyperlocal Checkout</p>
                 </div>
                 {% endif %}
 
                 <div id="request-form" class="contact-section pt-2">
                     {% if user.is_authenticated %}
-                        {% if user != service.author %}
+                        {% if user != service.user %}
                             {% if user_booking %}
                                 <div class="card border-0 bg-info bg-opacity-10 p-4 rounded-4 text-center">
                                     <div class="bg-info bg-opacity-20 rounded-circle d-inline-block p-3 mb-3">
                                         <i class="fas fa-history text-info fs-4"></i>
                                     </div>
-                                    <h6 class="fw-bold mb-1 text-white">Request Status: <span class="text-uppercase text-info">{{ user_booking.status }}</span></h6>
-                                    <p class="text-white small mb-3">Sent on {{ user_booking.created_at|date:"M d, Y" }}</p>
-                                    <a href="{% url 'booking_inbox' %}" class="btn btn-sm btn-info rounded-pill px-4 text-dark">Track in Inbox</a>
+                                    <h6 class="fw-bold mb-1 text-dark">Request Status: <span class="text-uppercase text-info">{{ user_booking.status }}</span></h6>
+                                    <p class="text-dark-50 small mb-3">Sent on {{ user_booking.timestamp|date:"M d, Y" }}</p>
+                                    <a href="{% url 'inbox' %}" class="btn btn-sm btn-info rounded-pill px-4 text-dark">Track in Inbox</a>
                                 </div>
                             {% else %}
-                                <h5 class="fw-bold mb-4">Request this Service</h5>
+                                <h5 class="fw-bold mb-4 text-dark">Request this Service</h5>
                                 <form method="POST" class="needs-validation">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         {{ booking_form.message }}
                                     </div>
-                                    <button type="submit" name="request_service" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">
+                                    <button type="submit" name="request_service" class="btn btn-primary w-100 py-3 fw-bold shadow-sm rounded-pill">
                                         <i class="fas fa-paper-plane me-2"></i>Send Request
                                     </button>
                                 </form>
@@ -179,8 +218,8 @@
                             </div>
                         {% endif %}
                     {% else %}
-                        <div class="text-center p-3 bg-secondary bg-opacity-10 rounded-4">
-                            <p class="small text-dim mb-3 text-start">Interested in this service? Log in to discuss the details.</p>
+                        <div class="text-center p-3 bg-light border rounded-4">
+                            <p class="small text-secondary mb-3 text-start">Interested in this service? Log in to discuss the details.</p>
                             <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary w-100 py-3 fw-bold">Login to Contact</a>
                         </div>
                     {% endif %}

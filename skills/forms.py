@@ -1,15 +1,15 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import UserProfile, ServicePost, ServiceRequest, Message, Review, ServiceBooking
+from .models import UserProfile, Service, HelpRequest, Message, Review, Request
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=100, required=True)
 
-    class Meta:
+    class Meta(UserCreationForm.Meta):
         model = User
-        fields = ['username', 'first_name', 'email']
+        fields = UserCreationForm.Meta.fields + ('first_name', 'email')
 
 class UserProfileForm(forms.ModelForm):
     first_name = forms.CharField(max_length=100, required=True)
@@ -41,7 +41,7 @@ class UserProfileForm(forms.ModelForm):
             profile.save()
         return profile
 
-class ServicePostForm(forms.ModelForm):
+class ServiceForm(forms.ModelForm):
     custom_category = forms.CharField(
         max_length=50, 
         required=False, 
@@ -49,7 +49,7 @@ class ServicePostForm(forms.ModelForm):
     )
 
     class Meta:
-        model = ServicePost
+        model = Service
         fields = ['title', 'description', 'category', 'custom_category', 'image', 'payment_type', 'price', 'location', 'payment_method', 'delivery_time']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Enter a catchy title for your service'}),
@@ -93,9 +93,9 @@ class ServicePostForm(forms.ModelForm):
 
         return cleaned_data
 
-class ServiceBookingForm(forms.ModelForm):
+class RequestForm(forms.ModelForm):
     class Meta:
-        model = ServiceBooking
+        model = Request
         fields = ['message']
         widgets = {
             'message': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional: Add a message for the provider...'}),
@@ -105,7 +105,7 @@ class ServiceBookingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['message'].widget.attrs.update({'class': 'form-control'})
 
-class ServiceRequestForm(forms.ModelForm):
+class HelpRequestForm(forms.ModelForm):
     custom_category = forms.CharField(
         max_length=50, 
         required=False, 
@@ -113,7 +113,7 @@ class ServiceRequestForm(forms.ModelForm):
     )
 
     class Meta:
-        model = ServiceRequest
+        model = HelpRequest
         fields = ['title', 'description', 'category', 'custom_category', 'budget']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'What are you looking for?'}),

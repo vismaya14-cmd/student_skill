@@ -3,48 +3,66 @@
 {% block title %}[Request] {{ req.title }} - SkillHub{% endblock %}
 
 {% block content %}
-<div class="section">
-    <div class="detail-layout">
-        <div class="detail-card">
-            <div class="detail-meta">
-                <span class="badge badge-info">{{ req.get_category_display }}</span>
-                {% if req.budget %}
-                    <span class="badge badge-secondary">Budget: {{ req.budget }}</span>
-                {% endif %}
-                <span class="badge badge-secondary">Requested {{ req.created_at|date:"M d, Y" }}</span>
-            </div>
-            
-            <h1 class="detail-title"><span style="color: var(--accent);">Need:</span> {{ req.title }}</h1>
-            
-            <div class="detail-desc">
-                {{ req.description }}
-            </div>
-
-            {% if user == req.requester %}
-            <div class="mt-3 d-flex gap-2">
-                <a href="{% url 'delete_service_request' req.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete Request</a>
-            </div>
-            {% endif %}
-        </div>
-
-        <aside class="detail-sidebar">
-            <div class="author-card">
-                <div class="avatar-lg" style="margin: 0 auto 1rem;">
-                    {% if profile.avatar %}
-                        <img src="{{ profile.avatar.url }}" alt="{{ req.requester.username }}">
-                    {% else %}
-                        {{ req.requester.username|slice:":1"|upper }}
-                    {% endif %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border border-dark border-opacity-10 shadow-lg bg-card rounded-5 overflow-hidden">
+            <div class="p-5">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill fw-bold text-uppercase" style="font-size: 0.7rem;">
+                        <i class="fas fa-bullhorn me-2"></i>{{ req.get_category_display }}
+                    </span>
+                    <span class="text-dark-50 small">{{ req.created_at|date:"M d, Y" }}</span>
                 </div>
-                <h3>{{ req.requester.username }}</h3>
-                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">
-                    Requester
-                </p>
-                <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;">
-                <a href="{% url 'profile_detail' req.requester.username %}" class="btn btn-secondary btn-sm btn-block">View Profile</a>
-                <a href="mailto:{{ req.requester.email }}" class="btn btn-success btn-sm btn-block mt-1" style="color:white;">I can help with this!</a>
+
+                <h1 class="display-5 fw-800 text-dark mb-4">Need: {{ req.title }}</h1>
+                
+                <div class="fs-5 text-dark-50 lh-base mb-5">
+                    {{ req.description|linebreaks }}
+                </div>
+
+                {% if req.budget %}
+                    <div class="p-3 bg-warning bg-opacity-10 rounded-4 border border-warning border-opacity-20 d-inline-flex align-items-center">
+                        <i class="fas fa-wallet text-warning me-3 fs-4"></i>
+                        <div>
+                            <div class="extra-small text-warning text-uppercase fw-bold opacity-75">Estimated Budget</div>
+                            <div class="fw-bold fs-5 text-dark">{{ req.budget }}</div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if user == req.user %}
+                    <div class="mt-5 pt-4 border-top border-dark border-opacity-10">
+                        <a href="#" class="btn btn-outline-danger btn-sm rounded-pill px-4" onclick="return confirm('Delete this request?')">Delete Listing</a>
+                    </div>
+                {% endif %}
             </div>
-        </aside>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border border-dark border-opacity-10 shadow-lg bg-card rounded-5 sticky-top" style="top: 100px;">
+            <div class="card-body p-5 text-center">
+                <div class="avatar-glow mb-4 d-inline-block p-1 bg-gradient-orange rounded-circle">
+                    <div class="avatar-lg rounded-circle bg-card d-flex align-items-center justify-content-center text-dark display-6" style="width: 100px; height: 100px;">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" class="rounded-circle w-100 h-100 object-fit-cover shadow-sm" alt="{{ req.user.username }}">
+                        {% else %}
+                            {{ req.user.username|slice:":1"|upper }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <h4 class="fw-bold mb-1 text-dark">@{{ req.user.username }}</h4>
+                <p class="text-dark-50 small mb-4">Community Requester</p>
+                
+                <div class="d-grid gap-3 pt-3 border-top border-dark border-opacity-10">
+                    <a href="{% url 'profile' req.user.username %}" class="btn btn-outline-warning rounded-pill py-2 fw-bold">View Profile</a>
+                    <a href="mailto:{{ req.user.email }}" class="btn btn-warning rounded-pill py-3 fw-bold text-dark shadow-sm">
+                        <i class="fas fa-hand-holding-heart me-2"></i>I Can Help!
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

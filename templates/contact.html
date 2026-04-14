@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us - SkillHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-lg-6">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-4" style="width: 80px; height: 80px;">
+                <i class="fas fa-envelope-open-text fs-1 text-danger"></i>
+            </div>
+            <h1 class="display-5 fw-bold text-dark mb-3">Get in Touch</h1>
+            <p class="fs-5 text-dark-50 px-md-5">Have a question or feedback? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+        </div>
+
+        <!-- Contact Form Card -->
+        <div class="card bg-card border border-dark border-opacity-10 rounded-5 p-4 p-md-5 shadow-lg">
+            <form action="{% url 'contact' %}" method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label for="name" class="form-label fw-bold text-dark-50 px-2 small text-uppercase tracking-widest">Your Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-secondary border-opacity-25 text-primary border-end-0 rounded-start-pill ps-4">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" class="form-control bg-light border-secondary border-opacity-25 text-dark border-start-0 rounded-end-pill py-3" id="name" name="name" placeholder="John Doe" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="email" class="form-label fw-bold text-dark-50 px-2 small text-uppercase tracking-widest">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-secondary border-opacity-25 text-primary border-end-0 rounded-start-pill ps-4">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <input type="email" class="form-control bg-light border-secondary border-opacity-25 text-dark border-start-0 rounded-end-pill py-3" id="email" name="email" placeholder="john@student.edu" required>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label for="message" class="form-label fw-bold text-dark-50 px-2 small text-uppercase tracking-widest">Your Message</label>
+                    <textarea class="form-control bg-light border-secondary border-opacity-25 text-dark py-3 px-4 rounded-4" id="message" name="message" rows="5" placeholder="How can we help you today?" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-danger btn-lg w-100 rounded-pill py-3 fw-bold shadow-lg d-flex justify-content-center align-items-center gap-2 hover-lift transition-all">
+                    <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tracking-widest {
+        letter-spacing: 0.1em;
+    }
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 1rem 2rem rgba(220, 53, 69, 0.3) !important;
+    }
+    .form-control:focus {
+        background-color: var(--bs-dark);
+        border-color: var(--bs-danger);
+        box-shadow: none;
+        color: white;
+    }
+</style>
+{% endblock %}

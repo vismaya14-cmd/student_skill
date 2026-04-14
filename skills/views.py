@@ -1,14 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q, Avg
-from .models import UserProfile, ServicePost, ServiceRequest, Message, Review, ServiceBooking, CATEGORY_CHOICES, Payment
-from .forms import UserRegisterForm, UserProfileForm, ServicePostForm, ServiceRequestForm, MessageForm, ReviewForm, ServiceBookingForm
+from django.db.models import Q, Avg, Sum, Count
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from datetime import timedelta
+import json
+from .models import UserProfile, Service, HelpRequest, Message, Review, Request, CATEGORY_CHOICES, Payment, Notification
+from .forms import UserRegisterForm, UserProfileForm, ServiceForm, HelpRequestForm, MessageForm, ReviewForm, RequestForm
 
 
 def home(request):
     category = request.GET.get('category')
-    services = ServicePost.objects.all()
+    services = Service.objects.all()
     if category:
         services = services.filter(category=category)
     
@@ -20,9 +24,19 @@ def home(request):
     }
     return render(request, 'home.html', context)
 
+def about(request):
+    return render(request, 'about.html')
+
+def contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        messages.success(request, f'Thank you for your message, {name}! We will get back to you soon.')
+        return redirect('contact')
+    return render(request, 'contact.html')
+
 def requests_hub(request):
     category = request.GET.get('category')
-    reqs = ServiceRequest.objects.filter(is_active=True)
+    reqs = HelpRequest.objects.filter(is_active=True)
     if category:
         reqs = reqs.filter(category=category)
     
@@ -37,10 +51,17 @@ def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}! You can now log in.')
-            return redirect('login')
+            try:
+                form.save()
+                username = form.cleaned_data.get('username')
+                messages.success(request, f'Account created for {username}! You can now log in.')
+                return redirect('login')
+            except Exception as e:
+                # Handle database-level duplicates that escaped form validation (e.g. case sensitivity)
+                if 'UNIQUE constraint failed: auth_user.username' in str(e):
+                    form.add_error('username', 'A user with that username already exists.')
+                else:
+                    form.add_error(None, f'An unexpected error occurred: {e}')
     else:
         form = UserRegisterForm()
     return render(request, 'register.html', {'form': form})
@@ -48,11 +69,29 @@ def register(request):
 @login_required
 def profile_view(request, username):
     profile = get_object_or_404(UserProfile, user__username=username)
-    user_services = ServicePost.objects.filter(author=profile.user)
-    return render(request, 'profile.html', {
+    user_services = Service.objects.filter(user=profile.user)
+    
+    # New Data for Modern Profile
+    reviews = Review.objects.filter(service__user=profile.user).order_by('-created_at')
+    activity = Request.objects.filter(
+        Q(sender=profile.user) | Q(receiver=profile.user)
+    ).select_related('service', 'sender', 'receiver').order_by('-created_at')[:10]
+    
+    completed_requests = Request.objects.filter(receiver=profile.user, status='completed').count()
+    earnings = Payment.objects.filter(
+        service__user=profile.user, 
+        status='success'
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+    
+    context = {
         'profile': profile,
-        'user_services': user_services
-    })
+        'user_services': user_services,
+        'reviews': reviews,
+        'activity': activity,
+        'completed_requests': completed_requests,
+        'earnings': earnings
+    }
+    return render(request, 'profile.html', context)
 
 @login_required
 def edit_profile(request):
@@ -69,75 +108,74 @@ def edit_profile(request):
 @login_required
 def post_service(request):
     if request.method == 'POST':
-        form = ServicePostForm(request.POST, request.FILES)
+        form = ServiceForm(request.POST, request.FILES)
 
         if form.is_valid():
             service = form.save(commit=False)
-            service.author = request.user
+            service.user = request.user
             print(f"DEBUG: Saving service '{service.title}' with payment_type: {service.payment_type}")
             service.save()
             messages.success(request, 'Service posted successfully!')
             return redirect('home')
     else:
-        form = ServicePostForm()
+        form = ServiceForm()
     return render(request, 'post_service.html', {'form': form})
 
 @login_required
 def post_request(request):
     if request.method == 'POST':
-        form = ServiceRequestForm(request.POST)
+        form = HelpRequestForm(request.POST)
         if form.is_valid():
             req = form.save(commit=False)
-            req.requester = request.user
+            req.user = request.user
             req.save()
             messages.success(request, 'Request posted successfully!')
             return redirect('requests_hub')
     else:
-        form = ServiceRequestForm()
+        form = HelpRequestForm()
     return render(request, 'post_request.html', {'form': form})
 
 def service_detail(request, pk):
-    service = get_object_or_404(ServicePost, pk=pk)
+    service = get_object_or_404(Service, pk=pk)
     reviews = service.reviews.all()
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
     
-    booking_form = ServiceBookingForm()
+    booking_form = RequestForm()
     review_form = ReviewForm()
     
     # Check if a booking already exists
     user_booking = None
     if request.user.is_authenticated:
-        user_booking = ServiceBooking.objects.filter(sender=request.user, service=service).first()
+        user_booking = Request.objects.filter(service=service, sender=request.user).exclude(status='rejected').last() if request.user.is_authenticated else None
     
+    # Check if user can review (must have a completed request)
+    can_review = Request.objects.filter(service=service, sender=request.user, status='completed').exists() if request.user.is_authenticated else False
+
     if request.method == 'POST':
         if 'request_service' in request.POST:
             if not request.user.is_authenticated:
                 return redirect('login')
-            b_form = ServiceBookingForm(request.POST)
+            b_form = RequestForm(request.POST)
             if b_form.is_valid():
-                # Ensure the user isn't requesting their own service
-                if request.user == service.author:
+                target_service = service  # Use the 'service' object already fetched
+                sender_user = request.user
+                receiver_user = target_service.user
+
+                if sender_user == receiver_user:
                     messages.error(request, "You cannot request your own service.")
                     return redirect('service_detail', pk=pk)
-                
-                booking = b_form.save(commit=False)
-                booking.sender = request.user
-                booking.receiver = service.author
-                booking.service = service
-                
-                # DEBUG LOGGING
-                print(f"--- DEBUG: MANUAL REQUEST ---")
-                print(f"Sender: {booking.sender.username}")
-                print(f"Receiver (Owner): {booking.receiver.username if booking.receiver else 'NULL'}")
-                print(f"Service: {booking.service.title}")
-                print(f"-----------------------------")
 
-                if booking.receiver:
-                    booking.save()
-                    messages.success(request, f'Service request sent successfully to {service.author.username}!')
-                else:
-                    messages.error(request, 'Error: Service provider not found.')
-                return redirect('service_detail', pk=pk)
+                # Direct creation as requested to ensure data integrity
+                Request.objects.create(
+                    sender=sender_user,
+                    receiver=receiver_user,
+                    service=target_service,
+                    message=b_form.cleaned_data.get('message', ''),
+                    status='pending'
+                )
+                
+                messages.success(request, f'Service request sent successfully to {receiver_user.username}!')
+                return redirect('inbox')
         
         elif 'add_review' in request.POST:
             if not request.user.is_authenticated:
@@ -157,47 +195,71 @@ def service_detail(request, pk):
         'avg_rating': avg_rating,
         'booking_form': booking_form,
         'review_form': review_form,
-        'user_booking': user_booking
+        'user_booking': user_booking,
+        'can_review': can_review
     }
     return render(request, 'service_detail.html', context)
 
 @login_required
 def booking_inbox(request):
-    # Fetch private service bookings (Receiver = You)
-    received_bookings = ServiceBooking.objects.filter(receiver=request.user)
-    
-    # Fetch private service bookings (Sender = You)
-    sent_bookings = ServiceBooking.objects.filter(sender=request.user)
-    
-    # Fetch public help-requests you've posted
-    user_requests = ServiceRequest.objects.filter(requester=request.user)
-    
-    # Unify for the 'Requests' context variable as requested
-    requests = list(received_bookings)
-    
-    return render(request, 'booking_inbox.html', {
-        'received_bookings': received_bookings,
-        'sent_bookings': sent_bookings,
-        'user_requests': user_requests,
-        'requests': requests # Mapping the loop variable
-    })
+    return redirect('inbox')
 
 @login_required
 def accept_request(request, id):
-    # Using ServiceBooking as the 'Request' model for this project
-    req = get_object_or_404(ServiceBooking, id=id, receiver=request.user)
+    # Using Request model
+    req = get_object_or_404(Request, id=id, receiver=request.user)
     req.status = 'accepted'
     req.save()
     messages.success(request, 'Request accepted successfully!')
     return redirect('inbox')
 
 @login_required
+def complete_request(request, id):
+    booking = get_object_or_404(Request, id=id)
+    # Only the sender (seeker) can mark it as completed
+    if booking.sender == request.user:
+        booking.status = 'completed'
+        booking.save()
+        messages.success(request, f"Service '{booking.service.title}' marked as completed! You can now leave a review.")
+    else:
+        messages.error(request, "Permission denied.")
+    return redirect('inbox')
+
+@login_required
 def reject_request(request, id):
-    # Using ServiceBooking as the 'Request' model for this project
-    req = get_object_or_404(ServiceBooking, id=id, receiver=request.user)
+    # Using Request model
+    req = get_object_or_404(Request, id=id, receiver=request.user)
     req.status = 'rejected'
     req.save()
     messages.warning(request, 'Request rejected.')
+    return redirect('inbox')
+@login_required
+def send_message_inbox(request, request_id):
+    booking = get_object_or_404(Request, id=request_id)
+    
+    # Requirement: Allow messaging ONLY if request status is 'pending' or 'accepted'
+    if booking.status not in ['pending', 'accepted']:
+        messages.error(request, "Communication is only available for active or pending inquiries.")
+        return redirect('inbox')
+        
+    if request.method == 'POST':
+        message_text = request.POST.get('message')
+        if message_text:
+            # Requirement: Implement precise student-to-student mapping
+            # If logged-in user == request.sender: receiver = request.receiver
+            # If logged-in user == request.receiver: receiver = request.sender
+            if request.user == booking.sender:
+                receiver = booking.receiver
+            else:
+                receiver = booking.sender
+                
+            Message.objects.create(
+                sender=request.user,
+                receiver=receiver,
+                request=booking,
+                message=message_text
+            )
+            messages.success(request, 'Message sent!')
     return redirect('inbox')
 
 @login_required
@@ -211,54 +273,30 @@ def manage_booking(request, pk, action):
 
 @login_required
 def inbox(request):
-    # Fetch all incoming messages and service requests (bookings)
-    received_messages = Message.objects.filter(receiver=request.user)
-    received_requests = ServiceBooking.objects.filter(receiver=request.user)
+    # Mark user's notifications as read when they open the inbox
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     
-    # Combine and sort for a unified inbox experience
-    # Note: ServiceBooking uses 'created_at', Message uses 'timestamp'
-    items = list(received_messages) + list(received_requests)
-    items.sort(key=lambda x: getattr(x, 'timestamp', getattr(x, 'created_at', None)), reverse=True)
+    # Requirement: Fetch requests where user is either Sender OR Receiver
+    requests = Request.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).select_related('service', 'sender', 'receiver').order_by('-created_at')
     
-    recent_services = ServicePost.objects.all()[:4]
-    
-    context = {
-        'items': items,
-        'received_requests': received_requests,
-        'requests': received_requests, # Explicitly passed as requested
-        'recent_services': recent_services
-    }
-    
-    return render(request, 'inbox.html', context)
+    # Pass to template as 'requests'
+    return render(request, 'inbox.html', {
+        'requests': requests
+    })
 
 @login_required
 def sent_messages(request):
-    # Fetch all outgoing messages and service requests (bookings)
-    sent_messages = Message.objects.filter(sender=request.user)
-    sent_requests = ServiceBooking.objects.filter(sender=request.user)
-    
-    # Combine and sort for a unified sent view
-    items = list(sent_messages) + list(sent_requests)
-    items.sort(key=lambda x: getattr(x, 'timestamp', getattr(x, 'created_at', None)), reverse=True)
-    
-    recent_services = ServicePost.objects.all()[:4]
-    
-    context = {
-        'items': items,
-        'sent_requests': sent_requests,
-        'requests': sent_requests, # Explicitly passed as requested
-        'recent_services': recent_services
-    }
-    
-    return render(request, 'sent_messages.html', context)
+    return redirect('inbox')
 
 def search(request):
     query = request.GET.get('q', '')
     category = request.GET.get('category', '')
     location = request.GET.get('location', '')
     
-    results_services = ServicePost.objects.all()
-    results_requests = ServiceRequest.objects.all()
+    results_services = Service.objects.all()
+    results_requests = HelpRequest.objects.all()
     
     if query:
         results_services = results_services.filter(
@@ -287,12 +325,71 @@ def search(request):
 
 @login_required
 def dashboard(request):
-    user_services = ServicePost.objects.filter(author=request.user)
-    user_requests = ServiceRequest.objects.filter(requester=request.user)
+    user_services = Service.objects.filter(user=request.user)
+    user_requests = HelpRequest.objects.filter(user=request.user)
     
-    # Recent bookings for dashboard
-    incoming_bookings = ServiceBooking.objects.filter(receiver=request.user)[:5]
-    sent_bookings = ServiceBooking.objects.filter(sender=request.user)[:5]
+    # New calculated stats for modern dashboard
+    total_services = user_services.count()
+    total_requests = user_requests.count()
+    pending_actions = Request.objects.filter(receiver=request.user, status='pending').count()
+    
+    # TOTAL Earnings: Sum of successful payments made for services OWNED by the current user
+    total_earnings = Payment.objects.filter(
+        service__user=request.user, 
+        status='success'
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+    # Pictorial stats calculations
+    accepted_requests = Request.objects.filter(receiver=request.user, status='accepted').count()
+    
+    # Percentage logic (clamping between 0 and 100)
+    def calc_percent(value, target):
+        if not target: return 0
+        return min(100, int((value / target) * 100))
+    
+    # Targets (Defaults)
+    service_target = 10
+    request_target = 20
+    earnings_goal = 5000
+    
+    services_percent = calc_percent(total_services, service_target)
+    requests_percent = calc_percent(total_requests, request_target)
+    acceptance_rate = calc_percent(accepted_requests, total_requests) if total_requests else 0
+    earnings_percent = calc_percent(total_earnings, earnings_goal)
+    seven_days_ago = timezone.now().date() - timedelta(days=6)
+    daily_requests = Request.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user),
+        created_at__date__gte=seven_days_ago
+    ).annotate(date=TruncDate('created_at')).values('date').annotate(count=Count('id')).order_by('date')
+    
+    # Fill gaps in 7-day data
+    date_labels = []
+    date_counts = []
+    for i in range(7):
+        curr_date = seven_days_ago + timedelta(days=i)
+        date_labels.append(curr_date.strftime("%b %d"))
+        count = next((item['count'] for item in daily_requests if item['date'] == curr_date), 0)
+        date_counts.append(count)
+        
+    # --- CHART DATA 2: Services By Category ---
+    category_data = user_services.values('category').annotate(count=Count('id')).order_by('-count')
+    category_labels = [dict(CATEGORY_CHOICES).get(item['category'], item['category']) for item in category_data]
+    category_counts = [item['count'] for item in category_data]
+
+    # --- RECENT ACTIVITY LEDGER ---
+    # Latest unified requests for dashboard
+    recent_requests = Request.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).select_related('service', 'sender', 'receiver').order_by('-created_at')[:5]
+    
+    # Latest messages
+    recent_messages = Message.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).select_related('sender', 'request').order_by('-timestamp')[:5]
+    
+    # Latest payments
+    latest_payments = Payment.objects.filter(
+        Q(user=request.user) | Q(service__user=request.user)
+    ).select_related('user', 'service').order_by('-timestamp')[:5]
     
     received_messages = Message.objects.filter(receiver=request.user)[:5]
     sent_messages = Message.objects.filter(sender=request.user)[:5]
@@ -300,69 +397,131 @@ def dashboard(request):
     return render(request, 'dashboard.html', {
         'user_services': user_services,
         'user_requests': user_requests,
-        'incoming_bookings': incoming_bookings,
-        'sent_bookings': sent_bookings,
+        'total_services': total_services,
+        'total_requests': total_requests,
+        'pending_actions': pending_actions,
+        'total_earnings': total_earnings,
+        'accepted_requests': accepted_requests,
+        'services_percent': services_percent,
+        'requests_percent': requests_percent,
+        'acceptance_rate': acceptance_rate,
+        'earnings_percent': earnings_percent,
+        'recent_requests': recent_requests,
+        'recent_messages': recent_messages, # Added unified messages
+        'latest_payments': latest_payments,
+        'chart_labels': json.dumps(date_labels),
+        'chart_data': json.dumps(date_counts),
+        'cat_labels': json.dumps(category_labels),
+        'cat_data': json.dumps(category_counts),
         'received_messages': received_messages,
         'sent_messages': sent_messages,
     })
 
 @login_required
 def delete_service(request, pk):
-    service = get_object_or_404(ServicePost, pk=pk, author=request.user)
+    service = get_object_or_404(Service, pk=pk, user=request.user)
     service.delete()
     messages.success(request, 'Post deleted.')
     return redirect('dashboard')
 @login_required
 def payment_view(request, service_id):
-    service = get_object_or_404(ServicePost, pk=service_id)
-    
-    # Negotiable services might have price as None, use a default placeholder or handle
+    """Legacy view kept for backward compatibility (from service_detail page)."""
+    service = get_object_or_404(Service, pk=service_id)
     amount = service.price if service.price else 0
-    
+
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
-        
-        # Save payment record
         payment = Payment.objects.create(
             user=request.user,
             service=service,
             amount=amount,
             payment_method=payment_method,
-            status='success' # Simulation
+            status='success'
         )
-        
-        # 1. Automatically create an accepted ServiceBooking
-        if service.author:
-            # DEBUG LOGGING
-            print(f"--- DEBUG: AUTO PAYMENT BOOKING ---")
-            print(f"Sender: {request.user.username}")
-            print(f"Receiver (Owner): {service.author.username}")
-            print(f"Service: {service.title}")
-            print(f"-----------------------------------")
-
-            booking = ServiceBooking.objects.create(
+        if service.user and request.user != service.user:
+            Request.objects.create(
                 sender=request.user,
-                receiver=service.author,
+                receiver=service.user,
                 service=service,
                 message=f"AUTOGENERATED: Payment of ₹{amount} confirmed via {payment_method.upper()}.",
-                status='accepted'
+                status='paid',
+                payment=payment
             )
-            
-            # 2. Automatically create a confirmation Message for the Inbox
             Message.objects.create(
                 sender=request.user,
-                receiver=service.author,
+                receiver=service.user,
                 service=service,
-                message=f"Hello! I've just completed the payment for your service '{service.title}'. Transaction ID: #SKL{payment.pk+10000}. Please check your bookings!"
+                message=f"Payment for '{service.title}' completed. Ref: #SKL{payment.pk+10000}."
             )
-            messages.success(request, f'Payment of ₹{amount} was successful! Booking and confirmation sent.')
-        else:
-            messages.warning(request, f'Payment of ₹{amount} successful, but could not notify provider (Provider not found).')
+            messages.success(request, f'Payment of ₹{amount} successful!')
         return redirect('payment_success', payment_id=payment.pk)
-        
+
+    return render(request, 'payment.html', {'service': service, 'amount': amount})
+
+
+@login_required
+def payment_from_request(request, request_id):
+    """
+    New view: payment triggered from inbox after a request is ACCEPTED.
+    Enforces all payment guards from the requirements.
+    """
+    booking = get_object_or_404(Request, pk=request_id)
+
+    # GUARD 1: Only the requester (sender) can pay
+    if request.user != booking.sender:
+        messages.error(request, "Only the requester can make a payment.")
+        return redirect('inbox')
+
+    # GUARD 2: Payment only allowed after acceptance
+    if booking.status != 'accepted':
+        return redirect('inbox')
+
+    # GUARD 3: No duplicate payments
+    if hasattr(booking, 'request_payment') and booking.request_payment is not None:
+        messages.warning(request, "Payment has already been completed for this request.")
+        return redirect('payment_success', payment_id=booking.request_payment.pk)
+
+    service = booking.service
+    amount = service.price if service.price else 0
+
+    if request.method == 'POST':
+        payment_method = request.POST.get('payment_method')
+        if not payment_method:
+            messages.error(request, "Please select a payment method.")
+            return redirect('payment_from_request', request_id=request_id)
+
+        # Create the Payment record linked to the Request
+        payment = Payment.objects.create(
+            user=request.user,
+            service=service,
+            request=booking,
+            amount=amount,
+            payment_method=payment_method,
+            status='success'
+        )
+
+        # Update request status to 'paid'
+        booking.status = 'paid'
+        booking.save()
+
+        # Send confirmation message to service provider
+        Message.objects.create(
+            sender=request.user,
+            receiver=booking.receiver,
+            request=booking,
+            message=(
+                f"Payment of ₹{amount} for '{service.title}' completed via "
+                f"{payment_method.upper()}. Ref: #SKL{payment.pk + 10000}."
+            )
+        )
+
+        messages.success(request, f'Payment of ₹{amount} successful! Booking confirmed.')
+        return redirect('payment_success', payment_id=payment.pk)
+
     return render(request, 'payment.html', {
         'service': service,
-        'amount': amount
+        'amount': amount,
+        'booking': booking,
     })
 
 @login_required

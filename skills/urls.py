@@ -3,8 +3,11 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),
     path('requests/', views.requests_hub, name='requests_hub'),
     path('search/', views.search, name='search'),
+    path('services/', views.search, name='services'),
     path('inbox/', views.inbox, name='inbox'),
     path('sent/', views.sent_messages, name='sent_messages'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
@@ -14,11 +17,14 @@ urlpatterns = [
     path('service/<int:pk>/', views.service_detail, name='service_detail'),
     path('booking-inbox/', views.booking_inbox, name='booking_inbox'),
     path('manage-booking/<int:pk>/<str:action>/', views.manage_booking, name='manage_booking'),
-    path('request/accept/<int:id>/', views.accept_request, name='accept_request'),
-    path('request/reject/<int:id>/', views.reject_request, name='reject_request'),
+    path('accept-request/<int:id>/', views.accept_request, name='accept_request'),
+    path('reject-request/<int:id>/', views.reject_request, name='reject_request'),
+    path('complete-request/<int:id>/', views.complete_request, name='complete_request'),
+    path('send-message-inbox/<int:request_id>/', views.send_message_inbox, name='send_message_inbox'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('delete-service/<int:pk>/', views.delete_service, name='delete_service'),
     path('payment/<int:service_id>/', views.payment_view, name='payment'),
+    path('payment-request/<int:request_id>/', views.payment_from_request, name='payment_from_request'),
     path('payment-success/<int:payment_id>/', views.payment_success, name='payment_success'),
     path('register/', views.register, name='register'),
 ]

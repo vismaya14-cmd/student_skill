@@ -3,136 +3,141 @@
 {% block title %}Search Results - SkillHub{% endblock %}
 
 {% block content %}
-<div class="row mb-5">
-    <div class="col-lg-12">
-        <h1 class="display-5 fw-bold mb-3">Search Results</h1>
-        <p class="text-secondary fs-5">Showing results for "<span class="text-info">{{ query }}</span>"</p>
-    </div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-lg-12">
-        <form class="card p-3 bg-secondary bg-opacity-10 border-info border-opacity-25" action="{% url 'search' %}" method="get">
-            <div class="row g-2">
-                <div class="col-md-6">
-                    <input type="text" name="q" class="form-control" placeholder="Keywords..." value="{{ query }}">
-                </div>
-                <div class="col-md-4">
-                    <select name="category" class="form-select">
-                        <option value="">All Categories</option>
-                        {% for cat_val, cat_name in categories %}
-                            <option value="{{ cat_val }}" {% if selected_category == cat_val %}selected{% endif %}>{{ cat_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-info w-100 fw-bold">Filter</button>
+<div class="services-page py-4">
+    <div class="container">
+        <div class="hero-section mb-5 py-5 px-4 rounded-5 border border-dark border-opacity-10 bg-white position-relative overflow-hidden">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-lg-12">
+                    <h1 class="display-4 fw-800 text-dark mb-3">Found: <span class="bg-gradient-blue bg-clip-text text-transparent" style="-webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"> "{{ query }}"</span></h1>
+                    <p class="text-dark-50 fs-5 mb-0">Browse matching services and community help requests below.</p>
                 </div>
             </div>
-        </form>
-    </div>
-</div>
+        </div>
 
-<div class="row">
-    <!-- Services Section -->
-    <div class="col-lg-12 mb-5">
-        <h3 class="fw-bold mb-4 d-flex align-items-center">
-            <i class="fas fa-tools me-2 text-info"></i>Matching Services 
-            <span class="badge rounded-pill bg-info bg-opacity-10 text-info fw-bold ms-2 small">{{ results_services.count }}</span>
-        </h3>
-        <div class="row g-4">
-            {% for service in results_services %}
-                <div class="col-md-4">
-                    <div class="card shadow-sm h-100">
-                        <!-- Image Container -->
-                        <div class="position-relative overflow-hidden" style="height: 180px;">
-                            {% if service.image %}
-                                <img src="{{ service.image.url }}" class="w-100 h-100 object-fit-cover" alt="{{ service.title }}">
-                            {% else %}
-                                <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50">
-                                    <i class="fas fa-tools text-dim fs-2 opacity-25"></i>
-                                </div>
-                            {% endif %}
-                            <div class="position-absolute top-0 end-0 p-2">
-                                <span class="badge bg-primary bg-opacity-75 shadow-sm" style="font-size: 0.65rem;">{{ service.get_category_display }}</span>
-                            </div>
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <form class="card p-4 bg-white border border-dark border-opacity-10 rounded-4 shadow-sm" action="{% url 'search' %}" method="get">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Keyword</label>
+                            <input type="text" name="q" class="form-control" placeholder="Searching for..." value="{{ query }}">
                         </div>
-
-                        <div class="card-body p-4 d-flex flex-column">
-                            <h6 class="fw-bold mb-3 text-white">{{ service.title }}</h6>
-                            
-                            <div class="mb-4">
-                                    <span class="price">
-                                        <i class="fas fa-tag"></i>
-                                        {% if service.payment_type == 'free' %}Free
-                                        {% elif service.payment_type == 'paid' %}₹{{ service.price }}
-                                        {% else %}Negotiable{% endif %}
-                                    </span>
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-map-pin me-2 extra-small"></i>
-                                    <span class="extra-small text-dim">{{ service.location|default:"Online/Flexible" }}</span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-circle-user me-2 extra-small"></i>
-                                    <span class="extra-small text-dim">@{{ service.author.username }}</span>
-                                </div>
-                            </div>
-
-                            <div class="mt-auto d-flex gap-2">
-                                <a href="{% url 'service_detail' service.pk %}" class="btn btn-secondary btn-sm flex-fill fw-bold" style="font-size: 0.65rem;">View</a>
-                                <a href="{% url 'service_detail' service.pk %}#request-form" class="btn btn-primary btn-sm flex-fill fw-bold" style="font-size: 0.65rem;">Request</a>
-                            </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Category</label>
+                            <select name="category" class="form-select">
+                                <option value="">All Expertise</option>
+                                {% for cat_val, cat_name in categories %}
+                                    <option value="{{ cat_val }}" {% if selected_category == cat_val %}selected{% endif %}>{{ cat_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow-sm">
+                                <i class="fas fa-search me-2"></i>Refine Pursuit
+                            </button>
                         </div>
                     </div>
-                </div>
-            {% empty %}
-                <div class="col-12 text-center py-5 bg-secondary bg-opacity-5 rounded-4">
-                    <p class="text-dim mb-0">No services match your search.</p>
-                </div>
-            {% endfor %}
+                </form>
+            </div>
         </div>
-    </div>
 
-    <!-- Requests Section -->
-    <div class="col-lg-12">
-        <h3 class="fw-bold mb-4 d-flex align-items-center">
-            <i class="fas fa-bullhorn me-2 text-warning"></i>Matching Requests
-            <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning fw-bold ms-2 small">{{ results_requests.count }}</span>
-        </h3>
-        <div class="row g-4">
-            {% for req in results_requests %}
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm border-start border-warning border-4">
-                        <div class="card-body p-3 flex-column d-flex">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="badge-premium" style="background: rgba(255,193,7, 0.1); color: #ffc107; font-size: 0.6rem;">{{ req.get_category_display }}</span>
-                                <span class="text-warning fw-bold small">{{ req.budget|default:"Negotiable" }}</span>
-                            </div>
-                            <h5 class="fw-bold mb-2 text-truncate-1">{{ req.title }}</h5>
-                            <p class="text-dim small mb-0">{{ req.description|truncatewords:15 }}</p>
-                            <div class="mt-3 pt-3 border-top border-secondary border-opacity-10 d-flex justify-content-between align-items-center">
-                                <span class="extra-small text-dim"><i class="fas fa-user-circle me-1"></i>{{ req.requester.username }}</span>
-                                <a href="#" class="btn btn-sm btn-link text-warning text-decoration-none p-0 fw-bold small">Offer Help</a>
+        <div class="row">
+            <!-- Services Section -->
+            <div class="col-lg-12 mb-5">
+                <h3 class="fw-bold mb-4 d-flex align-items-center">
+                    <i class="fas fa-tools me-2 icon-blue"></i>Matching Services 
+                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary fw-bold ms-2 small">{{ results_services.count }}</span>
+                </h3>
+                <div class="row g-4">
+                    {% for service in results_services %}
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="position-relative bg-light" style="height: 200px;">
+                                    {% if service.image %}
+                                        <img src="{{ service.image.url }}" class="w-100 h-100 object-fit-cover transition-all" alt="{{ service.title }}">
+                                    {% else %}
+                                        <div class="placeholder-glow-custom">
+                                            <i class="fas fa-tools opacity-50 fs-1 text-primary"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="position-absolute top-0 end-0 p-3">
+                                        <span class="badge-blue px-2 py-1 rounded small fw-bold">{{ service.get_category_display }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <h6 class="fw-bold mb-3 text-dark fs-5">{{ service.title }}</h6>
+                                    
+                                    <div class="mb-4">
+                                        <div class="service-meta">
+                                            <i class="fas fa-tag icon-blue"></i>
+                                            <span>
+                                                {% if service.payment_type == 'free' %}Free
+                                                {% elif service.payment_type == 'paid' %}₹{{ service.price|default:"Not set"|floatformat:0 }}
+                                                {% else %}Negotiable{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="service-meta">
+                                            <i class="fas fa-user-circle icon-blue"></i>
+                                            <span>@{{ service.user.username|default:"Unknown" }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-auto d-flex gap-2">
+                                        <a href="{% url 'service_detail' service.pk %}" class="btn btn-outline-secondary rounded-pill flex-fill fw-bold">Explore</a>
+                                        <a href="{% url 'service_detail' service.pk %}#request-form" class="btn btn-primary rounded-pill flex-fill fw-bold">Request</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    {% empty %}
+                        <div class="col-12 text-center py-5">
+                            <p class="text-secondary mb-0">No services match your search.</p>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% empty %}
-                <div class="col-12 text-center py-5 bg-secondary bg-opacity-5 rounded-4">
-                    <p class="text-dim mb-0">No help requests match your search.</p>
+            </div>
+
+            <!-- Requests Section -->
+            <div class="col-lg-12">
+                <h3 class="fw-bold mb-4 d-flex align-items-center">
+                    <i class="fas fa-bullhorn me-2 icon-orange"></i>Matching Requests
+                    <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning fw-bold ms-2 small">{{ results_requests.count }}</span>
+                </h3>
+                <div class="row g-4">
+                    {% for req in results_requests %}
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body p-4 flex-column d-flex">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <span class="badge-orange px-2 py-1 rounded small fw-bold">{{ req.get_category_display }}</span>
+                                        <span class="text-warning fw-bold small"><i class="fas fa-wallet me-1"></i>{{ req.budget|default:"Negotiable" }}</span>
+                                    </div>
+                                    <h5 class="fw-bold mb-3 text-dark">{{ req.title }}</h5>
+                                    <p class="text-dark-50 small mb-0 flex-grow-1">{{ req.description|truncatewords:15 }}</p>
+                                    <div class="mt-4 pt-3 border-top border-dark border-opacity-10 d-flex justify-content-between align-items-center">
+                                        <span class="extra-small text-dark-50">@{{ req.user.username }}</span>
+                                        <a href="{% url 'profile' req.user.username %}" class="btn btn-sm btn-link text-warning text-decoration-none p-0 fw-bold small">Offer Expertise</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center py-5">
+                            <p class="text-secondary mb-0">No help requests match your search.</p>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            </div>
         </div>
+
+        {% if not results_services and not results_requests %}
+            <div class="text-center py-5">
+                <i class="fas fa-search-minus display-1 text-secondary mb-4"></i>
+                <h2 class="fw-bold">No results found</h2>
+                <a href="{% url 'home' %}" class="btn btn-primary mt-3">Back to Marketplace</a>
+            </div>
+        {% endif %}
     </div>
 </div>
-
-
-{% if not results_services and not results_requests %}
-    <div class="text-center py-5">
-        <i class="fas fa-search-minus display-1 text-dim mb-4"></i>
-        <h2 class="fw-bold">No results found</h2>
-        <p class="text-secondary">Try broader keywords or browse all categories on the home page.</p>
-        <a href="{% url 'home' %}" class="btn btn-primary mt-3">Back to Marketplace</a>
-    </div>
-{% endif %}
 {% endblock %}

@@ -5,15 +5,15 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-8 mx-auto">
-        <div class="card border-0 shadow-lg overflow-hidden">
+        <div class="card border border-dark border-opacity-10 shadow-lg overflow-hidden bg-card">
             <div class="card-header bg-warning bg-opacity-10 border-0 p-4">
                 <div class="d-flex align-items-center">
                     <div class="bg-warning p-3 rounded-4 me-3 shadow-sm">
                         <i class="fas fa-bullhorn text-dark fs-3"></i>
                     </div>
                     <div>
-                        <h2 class="fw-bold mb-0">Request Assistance</h2>
-                        <p class="text-dim small mb-0">Can't find what you need? Ask the community.</p>
+                        <h2 class="fw-bold mb-0 text-dark">Request Assistance</h2>
+                        <p class="text-dark-50 small mb-0">Can't find what you need? Ask the community.</p>
                     </div>
                 </div>
             </div>
@@ -29,18 +29,18 @@
                             Request Details
                         </h5>
                         <div class="mb-4">
-                            <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Request Title</label>
+                            <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Request Title</label>
                             {{ form.title }}
                             <div class="form-text extra-small opacity-50">Be specific (e.g., "Need help with Organic Chemistry Lab Report")</div>
                         </div>
 
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Skill Category</label>
+                                <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Skill Category</label>
                                 {{ form.category }}
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Estimated Budget</label>
+                                <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Estimated Budget</label>
                                 {{ form.budget }}
                             </div>
                             <div class="col-12" id="custom_category_wrapper_req" style="display: none;">
@@ -59,17 +59,17 @@
                             Help Needed
                         </h5>
                         <div class="mb-4">
-                            <label class="form-label small fw-bold text-dim text-uppercase tracking-wider">Description</label>
+                            <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Description</label>
                             {{ form.description }}
                             <div class="form-text extra-small opacity-50">Explain exactly what help you need and any deadlines.</div>
                         </div>
                     </div>
 
-                    <div class="d-grid gap-3 pt-4 border-top border-secondary border-opacity-25">
-                        <button type="submit" class="btn btn-warning btn-lg fw-bold py-3 text-dark">
+                    <div class="d-grid gap-3 pt-4 border-top border-secondary border-opacity-10">
+                        <button type="submit" class="btn btn-warning btn-lg fw-bold py-3 text-dark rounded-pill shadow-lg">
                             <i class="fas fa-paper-plane me-2"></i>Post My Request
                         </button>
-                        <a href="{% url 'requests_hub' %}" class="btn btn-link text-dim text-decoration-none small">
+                        <a href="{% url 'requests_hub' %}" class="btn btn-link text-secondary text-decoration-none small">
                             <i class="fas fa-arrow-left me-2"></i>Discard and go back
                         </a>
                     </div>

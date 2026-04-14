@@ -3,77 +3,108 @@
 {% block title %}SkillHub - My Hub{% endblock %}
 
 {% block content %}
-<div class="row mb-5">
-    <div class="col-lg-8">
-        <h1 class="display-5 fw-bold mb-2">My Hub</h1>
-        <p class="text-secondary fs-5">Manage your service offerings and help requests.</p>
-    </div>
-</div>
+<div class="services-page py-4">
+    <div class="container">
+        <div class="hero-section mb-5 py-5 px-4 rounded-5 border border-dark border-opacity-10 bg-white shadow-sm position-relative overflow-hidden">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-800 mb-3">Community <span class="text-primary">Needs Hub.</span></h1>
+                    <p class="fs-5 mb-0 opacity-75">See what fellow students are looking for and offer your expertise to help them out.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                    <a href="{% url 'post_request' %}" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold">
+                        <i class="fas fa-bullhorn me-2"></i>Post a Need
+                    </a>
+                </div>
+            </div>
+        </div>
 
-<div class="row">
-    <!-- Services Management -->
-    <div class="col-lg-12 mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0">My Active Services</h3>
-            <a href="{% url 'post_service' %}" class="btn btn-primary btn-sm">Post New</a>
-        </div>
-        
-        <div class="row g-4">
-            {% for service in user_services %}
-                <div class="col-md-4">
-                    <div class="card p-3 h-100 shadow-sm border-info border-opacity-25">
-                        <span class="badge bg-info text-dark align-self-start mb-2">{{ service.get_category_display }}</span>
-                        <h5 class="fw-bold">{{ service.title }}</h5>
-                        <p class="text-dim small text-truncate-2 mb-3">{{ service.description }}</p>
-                        <div class="mb-3">
-                            <span class="price">
-                                <i class="fas fa-tag"></i>
-                                {% if service.payment_type == 'free' %}Free
-                                {% elif service.payment_type == 'paid' %}₹{{ service.price|floatformat:0 }}
-                                {% else %}Negotiable{% endif %}
-                            </span>
-                        </div>
-                        <div class="mt-auto pt-3 d-flex justify-content-between align-items-center border-top border-secondary">
-                            <a href="{% url 'service_detail' service.pk %}" class="btn btn-sm btn-outline-info">View</a>
-                            <a href="{% url 'delete_service' service.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this service?')">Delete</a>
-                        </div>
-                    </div>
+        <div class="row">
+            <!-- Services Management -->
+            <div class="col-lg-12 mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold mb-0">My Active Services</h3>
+                    <a href="{% url 'post_service' %}" class="btn btn-primary btn-sm">Post New</a>
                 </div>
-            {% empty %}
-                <div class="col-12">
-                    <div class="card p-5 text-center bg-transparent border-dashed">
-                        <p class="text-dim mb-0">You haven't offered any services yet.</p>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
+                
+                <div class="row g-4">
+                    {% for service in user_services %}
+                        <div class="col-md-4">
+                            <div class="card h-100 shadow-lg border border-dark border-opacity-10 bg-card rounded-4 overflow-hidden hover-lift">
+                                <!-- Image Area -->
+                                <div class="position-relative bg-light" style="height: 180px;">
+                                    {% if service.image %}
+                                        <img src="{{ service.image.url }}" class="w-100 h-100 object-fit-cover transition-all" alt="{{ service.title }}">
+                                    {% else %}
+                                        <div class="placeholder-glow-custom">
+                                            <i class="fas fa-tools opacity-50 fs-1 text-primary"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="position-absolute bottom-0 start-0 p-3">
+                                        <span class="badge bg-primary bg-opacity-75 rounded-pill px-3">{{ service.get_category_display }}</span>
+                                    </div>
+                                </div>
 
-    <!-- Requests Management -->
-    <div class="col-lg-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0">My Requests</h3>
-            <a href="{% url 'post_request' %}" class="btn btn-warning btn-sm">Post Request</a>
-        </div>
-        
-        <div class="row g-4">
-            {% for req in user_requests %}
-                <div class="col-md-4">
-                    <div class="card p-3 h-100 shadow-sm border-warning border-opacity-25">
-                        <span class="badge bg-warning text-dark align-self-start mb-2">{{ req.get_category_display }}</span>
-                        <h5 class="fw-bold">{{ req.title }}</h5>
-                        <div class="mt-auto pt-3 text-end border-top border-secondary">
-                            <span class="small text-dim">Active</span>
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <h5 class="fw-bold mb-3 text-dark">{{ service.title }}</h5>
+                                    <div class="mb-4">
+                                        <div class="service-meta">
+                                            <i class="fas fa-tag"></i>
+                                            <span>
+                                                {% if service.payment_type == 'free' %}Free
+                                                {% elif service.payment_type == 'paid' %}₹{{ service.price|default:"0"|floatformat:0 }}
+                                                {% else %}Negotiable{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="service-meta">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>{{ service.location|default:"Location not set" }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-auto pt-3 d-flex justify-content-between align-items-center border-top border-dark border-opacity-10">
+                                        <a href="{% url 'service_detail' service.pk %}" class="btn btn-sm btn-outline-info rounded-pill px-4">View</a>
+                                        <a href="{% url 'delete_service' service.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-4" onclick="return confirm('Delete this service?')">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <div class="card p-5 text-center bg-transparent border-dashed">
+                                <p class="text-secondary mb-0">You haven't offered any services yet.</p>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% empty %}
-                <div class="col-12">
-                    <div class="card p-5 text-center bg-transparent border-dashed">
-                        <p class="text-dim mb-0">You haven't posted any help requests.</p>
-                    </div>
+            </div>
+
+            <!-- Requests Management -->
+            <div class="col-lg-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold mb-0">My Requests</h3>
+                    <a href="{% url 'post_request' %}" class="btn btn-warning btn-sm">Post Request</a>
                 </div>
-            {% endfor %}
+                
+                <div class="row g-4">
+                    {% for req in user_requests %}
+                        <div class="col-md-4">
+                            <div class="card p-4 h-100 shadow-lg border border-dark border-opacity-10 bg-card rounded-4">
+                                <span class="badge bg-warning bg-opacity-10 text-warning align-self-start mb-3 rounded-pill px-3">{{ req.get_category_display }}</span>
+                                <h5 class="fw-bold text-dark mb-0">{{ req.title }}</h5>
+                                <div class="mt-4 pt-3 text-end border-top border-dark border-opacity-10">
+                                    <span class="small text-warning fw-bold"><i class="fas fa-satellite-dish me-1"></i>Live</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <div class="card p-5 text-center bg-transparent border-dashed">
+                                <p class="text-secondary mb-0">You haven't posted any help requests.</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

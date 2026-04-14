@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 # Choices for categories
 CATEGORY_CHOICES = [
@@ -55,8 +56,8 @@ DELIVERY_CHOICES = [
     ('negotiable', 'Flexible / Negotiable'),
 ]
 
-class ServicePost(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='services')
+class Service(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='services')
     title = models.CharField(max_length=200)
     description = models.TextField()
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
@@ -83,8 +84,8 @@ class ServicePost(models.Model):
     def __str__(self):
         return self.title
 
-class ServiceRequest(models.Model):
-    requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_requests')
+class HelpRequest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='help_requests')
     title = models.CharField(max_length=200)
     description = models.TextField()
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
@@ -104,30 +105,47 @@ class ServiceRequest(models.Model):
     def __str__(self):
         return self.title
 
-class ServiceBooking(models.Model):
+class Request(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
+        ('completed', 'Completed'),
+        ('paid', 'Paid'),
     ]
     
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_bookings')
-    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_bookings')
-    service = models.ForeignKey(ServicePost, on_delete=models.CASCADE, related_name='bookings')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_requests')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_requests')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='requests')
     message = models.TextField(blank=True, null=True)
+    payment = models.OneToOneField('Payment', on_delete=models.SET_NULL, null=True, blank=True, related_name='booking')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
 
+    def clean(self):
+        # Defensive check: sender and receiver might not be set during form validation
+        try:
+            if self.sender and self.receiver and self.sender == self.receiver:
+                raise ValidationError("Sender and Receiver cannot be the same user.")
+        except (User.DoesNotExist, AttributeError, models.ObjectDoesNotExist):
+            pass
+
+    def save(self, *args, **kwargs):
+        # Removed self.full_clean() as it causes issues with commit=False and partial objects
+        super().save(*args, **kwargs)
+
+
     def __str__(self):
-        return f"Booking for {self.service.title} by {self.sender.username}"
+        return f"Request for {self.service.title} by {self.sender.username}"
 
 class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
-    service = models.ForeignKey(ServicePost, on_delete=models.SET_NULL, null=True, blank=True, related_name='messages')
+    request = models.ForeignKey(Request, on_delete=models.CASCADE, related_name='messages', null=True, blank=True)
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True, related_name='old_messages')
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
@@ -140,7 +158,7 @@ class Message(models.Model):
 
 class Review(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    service = models.ForeignKey(ServicePost, on_delete=models.CASCADE, related_name='reviews')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='reviews')
     rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -155,16 +173,44 @@ class Payment(models.Model):
         ('success', 'Success'),
         ('failed', 'Failed'),
     ]
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
-    service = models.ForeignKey(ServicePost, on_delete=models.CASCADE, related_name='payments')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='payments')
+    # Link to the specific Request this payment belongs to (prevents duplicate payments)
+    request = models.OneToOneField(
+        'Request', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='request_payment'
+    )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method = models.CharField(max_length=20, choices=[('upi', 'UPI'), ('card', 'Card'), ('cash', 'Cash')])
+    payment_method = models.CharField(
+        max_length=20,
+        choices=[('upi', 'UPI'), ('card', 'Card'), ('cash', 'Cash')]
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     class Meta:
         ordering = ['-timestamp']
 
     def __str__(self):
         return f"Payment of ₹{self.amount} for {self.service.title} by {self.user.username}"
+
+class Notification(models.Model):
+    TYPES = [
+        ('status', 'Status Change'),
+        ('message', 'New Message'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    notif_type = models.CharField(max_length=20, choices=TYPES)
+    related_request = models.ForeignKey('Request', on_delete=models.CASCADE, null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Notification for {self.user.username}: {self.title}"

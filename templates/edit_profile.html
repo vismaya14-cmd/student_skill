@@ -5,15 +5,15 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-lg" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(15px);">
+        <div class="card border border-dark border-opacity-10 shadow-lg bg-card rounded-5">
             <div class="card-body p-5">
                 <div class="d-flex align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-25">
                     <div class="bg-info bg-opacity-10 rounded-3 p-3 me-4">
                         <i class="fas fa-user-edit text-info fs-3"></i>
                     </div>
                     <div>
-                        <h2 class="fw-bold mb-1 text-white">Edit Profile</h2>
-                        <p class="text-dim mb-0">Customize how other students see your marketplace persona.</p>
+                        <h2 class="fw-bold mb-1 text-dark">Edit Profile</h2>
+                        <p class="text-secondary mb-0">Customize how other students see your marketplace persona.</p>
                     </div>
                 </div>
 
@@ -51,7 +51,7 @@
                         </div>
 
                         <div class="col-12 mt-4">
-                            <div class="p-4 rounded-4 bg-dark bg-opacity-25 border border-secondary border-opacity-25">
+                            <div class="p-4 rounded-4 bg-light bg-opacity-25 border border-secondary border-opacity-25">
                                 <label class="form-label fw-bold mb-3"><i class="fas fa-camera me-2 text-info"></i>Profile Avatar</label>
                                 <div class="d-flex align-items-center gap-4">
                                     {% if user.profile.avatar %}
@@ -59,16 +59,16 @@
                                     {% endif %}
                                     <div class="flex-grow-1">
                                         {{ form.avatar }}
-                                        <div class="form-text text-dim mt-2 small">Upload a professional photo to build trust with other students.</div>
+                                        <div class="form-text text-secondary mt-2 small">Upload a professional photo to build trust with other students.</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-5 d-flex gap-3">
-                        <button type="submit" class="btn btn-info px-5 py-2 fw-bold text-dark rounded-3 shadow-sm">Save Changes</button>
-                        <a href="{% url 'profile' user.username %}" class="btn btn-outline-secondary px-4 py-2 rounded-3">Cancel</a>
+                    <div class="mt-5 d-flex gap-3 pt-4 border-top border-dark border-opacity-10">
+                        <button type="submit" class="btn btn-info px-5 py-3 fw-bold text-dark rounded-pill shadow-lg">Save Changes</button>
+                        <a href="{% url 'profile' user.username %}" class="btn btn-outline-secondary px-5 py-3 rounded-pill">Cancel</a>
                     </div>
                 </form>
             </div>

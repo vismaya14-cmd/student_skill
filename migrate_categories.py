@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'marketplace.settings')
 django.setup()
 
-from skills.models import ServicePost, ServiceRequest
+from skills.models import Service, HelpRequest
 
 def migrate_categories():
     mapping = {
@@ -16,14 +16,14 @@ def migrate_categories():
     }
     
     # Update Services
-    for obj in ServicePost.objects.all():
+    for obj in Service.objects.all():
         if obj.category in mapping:
             obj.category = mapping[obj.category]
             obj.save()
             print(f"Updated Service {obj.id}: {obj.category}")
             
     # Update Requests
-    for obj in ServiceRequest.objects.all():
+    for obj in HelpRequest.objects.all():
         if obj.category in mapping:
             obj.category = mapping[obj.category]
             obj.save()

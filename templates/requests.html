@@ -3,36 +3,36 @@
 {% block title %}SkillHub - Service Requests{% endblock %}
 
 {% block content %}
-<div class="row mb-5">
-    <div class="col-lg-8">
-        <h1 class="display-5 fw-bold mb-3">Service Requests</h1>
-        <p class="text-secondary fs-5">See what fellow students need help with.</p>
-    </div>
-    <div class="col-lg-4 text-lg-end align-self-end">
-        <a href="{% url 'post_request' %}" class="btn btn-primary">
-            <i class="fas fa-bullhorn me-2"></i>Request Help
-        </a>
+<div class="hero-section mb-5 py-5 px-4 rounded-5 border border-dark border-opacity-10 bg-white shadow-sm position-relative overflow-hidden">
+    <div class="row align-items-center position-relative" style="z-index: 1;">
+        <div class="col-lg-8">
+            <h1 class="display-4 fw-800 mb-3">Community <span class="text-primary">Needs Hub.</span></h1>
+            <p class="fs-5 mb-0 opacity-75">See what fellow students are looking for and offer your expertise to help them out.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+            <a href="{% url 'post_request' %}" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold">
+                <i class="fas fa-bullhorn me-2"></i>Post a Need
+            </a>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <!-- Sidebar Filters -->
     <div class="col-md-3 mb-4">
-        <div class="card border-0 shadow-sm overflow-hidden" style="background: rgba(255, 193, 7, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 193, 7, 0.1) !important;">
-            <div class="card-body p-4">
-                <h5 class="fw-bold mb-4 d-flex align-items-center">
-                    <i class="fas fa-filter me-2 text-warning"></i>Categories
-                </h5>
-                <div class="list-group list-group-flush gap-2">
-                    <a href="{% url 'requests_hub' %}" class="list-group-item list-group-item-action border-0 rounded-3 px-3 py-2 bg-transparent text-white {% if not category %}active bg-warning bg-opacity-10 text-warning fw-bold{% endif %}">
-                        <i class="fas fa-th-large me-2 small"></i>All Needs
+        <div class="card border-0 shadow-sm p-4">
+            <h5 class="fw-bold mb-4 d-flex align-items-center">
+                <i class="fas fa-filter me-2"></i>Categories
+            </h5>
+            <div class="list-group list-group-flush gap-2">
+                <a href="{% url 'requests_hub' %}" class="list-group-item list-group-item-action border-0 rounded-3 px-3 py-2 bg-transparent {% if not category %}active bg-primary bg-opacity-5 text-primary fw-bold{% endif %}">
+                    <i class="fas fa-th-large me-2 small"></i>All Needs
+                </a>
+                {% for cat_id, cat_name in categories %}
+                    <a href="?category={{ cat_id }}" class="list-group-item list-group-item-action border-0 rounded-3 px-3 py-2 bg-transparent text-secondary {% if category == cat_id %}active bg-primary bg-opacity-5 text-primary fw-bold{% endif %}">
+                        <i class="fas fa-chevron-right me-2 small opacity-50"></i>{{ cat_name }}
                     </a>
-                    {% for cat_id, cat_name in categories %}
-                        <a href="?category={{ cat_id }}" class="list-group-item list-group-item-action border-0 rounded-3 px-3 py-2 bg-transparent text-white {% if category == cat_id %}active bg-warning bg-opacity-10 text-warning fw-bold{% endif %}">
-                            <i class="fas fa-chevron-right me-2 small opacity-50"></i>{{ cat_name }}
-                        </a>
-                    {% endfor %}
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -42,29 +42,26 @@
         <div class="row g-4">
             {% for req in requests %}
                 <div class="col-lg-6">
-                    <div class="card h-100 border-0 shadow-sm border-start border-warning border-4 bg-card">
-                        <div class="card-body p-4 d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <span class="badge-premium" style="background: rgba(255,193,7, 0.1); color: #ffc107; font-size: 0.7rem;">{{ req.get_category_display }}</span>
-                                <span class="text-warning fw-bold small">
-                                    {{ req.budget|default:"Negotiable" }}
-                                </span>
+                    <div class="card h-100 border-0 shadow-sm p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge-online">{{ req.get_category_display }}</span>
+                            <div class="service-meta mb-0">
+                                <i class="fas fa-wallet"></i>
+                                <span>{{ req.budget|default:"Negotiable" }}</span>
                             </div>
-                            
-                            <h4 class="card-title fw-bold mb-3 text-white">{{ req.title }}</h4>
-                            <p class="card-text text-dim small mb-4 flex-grow-1" style="line-height: 1.6;">{{ req.description|truncatewords:25 }}</p>
-                            
-                            <div class="mt-auto pt-3 border-top border-secondary border-opacity-10 d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-2 bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                        <i class="fas fa-user-graduate text-warning extra-small"></i>
-                                    </div>
-                                    <div>
-                                        <div class="extra-small fw-bold text-white">@{{ req.requester.username }}</div>
-                                        <div class="extra-small text-dim opacity-75">{{ req.created_at|date:"M d, Y" }}</div>
-                                    </div>
-                                </div>
-                                <a href="{% url 'profile' req.requester.username %}" class="btn btn-sm btn-warning fw-bold text-dark rounded-pill px-3" style="font-size: 0.7rem;">Help Out</a>
+                        </div>
+                        
+                        <h4 class="card-title mb-3">{{ req.title }}</h4>
+                        <p class="card-text small mb-4 flex-grow-1" style="line-height: 1.6; color: #334155;">{{ req.description|truncatewords:25 }}</p>
+                        
+                        <div class="mt-auto pt-3 border-top border-dark border-opacity-5">
+                            <div class="service-meta">
+                                <i class="fas fa-user"></i>
+                                <span>@{{ req.user.username|default:"Unknown" }}</span>
+                            </div>
+                            <div class="service-meta mb-0">
+                                <i class="far fa-calendar-alt"></i>
+                                <span>{{ req.created_at|date:"M d, Y" }}</span>
                             </div>
                         </div>
                     </div>
@@ -75,7 +72,7 @@
                         <i class="fas fa-bullhorn mb-0 fs-1 text-warning"></i>
                     </div>
                     <h3 class="fw-bold">No requests yet.</h3>
-                    <p class="text-dim">Be the first to ask for help!</p>
+                    <p class="text-secondary">Be the first to ask for help!</p>
                     <a href="{% url 'post_request' %}" class="btn btn-warning fw-bold text-dark mt-3">Post a Request</a>
                 </div>
             {% endfor %}
