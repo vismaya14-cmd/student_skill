@@ -2,6 +2,21 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+# Choices for location (cities)
+LOCATION_CHOICES = [
+    ('Mysore', 'Mysore'),
+    ('Bangalore', 'Bangalore'),
+    ('Mangalore', 'Mangalore'),
+    ('Chennai', 'Chennai'),
+    ('Hyderabad', 'Hyderabad'),
+]
+
+# Choices for service delivery type
+SERVICE_TYPE_CHOICES = [
+    ('Online', 'Online'),
+    ('Offline', 'Offline'),
+]
+
 # Choices for categories
 CATEGORY_CHOICES = [
     ('programming', 'Programming'),
@@ -76,12 +91,14 @@ class Service(models.Model):
 
     payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPE_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    location = models.CharField(max_length=255, blank=True, help_text="Where is this service available?")
+    location = models.CharField(max_length=100, choices=LOCATION_CHOICES, help_text="City where this service is available")
+    service_type = models.CharField(max_length=20, choices=SERVICE_TYPE_CHOICES, default='Online', help_text="Online or Offline delivery")
     
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, default='cash')
     delivery_time = models.CharField(max_length=50, choices=DELIVERY_CHOICES, default='negotiable')
     
     custom_category = models.CharField(max_length=50, blank=True, null=True)
+    is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

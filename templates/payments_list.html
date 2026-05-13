@@ -1,0 +1,117 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}SkillHub - Payment History{% endblock %}
+
+{% block content %}
+<div class="payments-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="dashboard-header animate-fade-up mb-5">
+            <h1 class="fw-800 h2 mb-1">Payment History Ledger 🧾</h1>
+            <p class="mb-0 text-white text-opacity-75">Track all your earnings and service payments in one place.</p>
+        </div>
+
+        <!-- Payments Table Card -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden animate-fade-up" style="animation-delay: 0.1s;">
+            <div class="card-header bg-white py-4 px-4 border-bottom border-light d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">Recent Transactions</h5>
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">{{ payments|length }} Records</span>
+            </div>
+            <div class="table-responsive p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light bg-opacity-50">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase small fw-bold text-secondary">Transaction ID</th>
+                            <th class="py-3 text-uppercase small fw-bold text-secondary">Service / Inquiry</th>
+                            <th class="py-3 text-uppercase small fw-bold text-secondary">Role</th>
+                            <th class="py-3 text-uppercase small fw-bold text-secondary">Amount</th>
+                            <th class="py-3 text-uppercase small fw-bold text-secondary">Date</th>
+                            <th class="pe-4 py-3 text-uppercase small fw-bold text-secondary text-end">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-bold text-dark">#SKL{{ payment.pk|add:10000 }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="dash-icon-box bg-light text-primary me-3 flex-shrink-0" style="width: 36px; height: 36px;">
+                                            <i class="fas fa-file-invoice"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold small text-dark">{{ payment.service.title }}</h6>
+                                            <p class="mb-0 extra-small text-muted">via {{ payment.payment_method|upper }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if payment.user == request.user %}
+                                        <span class="badge bg-info bg-opacity-10 text-info fw-bold rounded-pill px-3">Buyer / Paid</span>
+                                    {% else %}
+                                        <span class="badge bg-purple bg-opacity-10 text-purple fw-bold rounded-pill px-3">Provider / Earned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="fw-800 text-dark">₹{{ payment.amount|floatformat:0 }}</span>
+                                </td>
+                                <td>
+                                    <span class="small text-secondary">{{ payment.timestamp|date:"M d, Y" }}</span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <span class="badge bg-success bg-opacity-10 text-success fw-bold rounded-pill px-3 py-2">
+                                        <i class="fas fa-check-circle me-1"></i> {{ payment.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="py-4">
+                                        <i class="fas fa-receipt fs-1 text-secondary opacity-25 mb-3 d-block"></i>
+                                        <p class="text-secondary mb-0">No transactions found yet. Start browsing the marketplace!</p>
+                                        <a href="{% url 'services' %}" class="btn btn-primary btn-sm mt-3 px-4 rounded-pill">Explore Services</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Stats Summary Footer -->
+        <div class="row g-4 mt-4">
+            <div class="col-md-4 animate-fade-up" style="animation-delay: 0.2s;">
+                <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+                    <h6 class="text-secondary small fw-bold text-uppercase mb-3">Secure Transactions</h6>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-shield-alt text-success fs-3 me-3"></i>
+                        <p class="small text-muted mb-0">All student transactions on SkillHub are protected and verified.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 animate-fade-up" style="animation-delay: 0.3s;">
+                <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100 d-flex flex-row align-items-center">
+                    <div class="dash-icon-box bg-grad-green text-white me-4" style="width: 60px; height: 60px;">
+                        <i class="fas fa-question-circle fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Need help with a payment?</h6>
+                        <p class="small text-muted mb-0">Contact our support team if you notice any discrepancies in your ledger.</p>
+                    </div>
+                    <a href="{% url 'contact' %}" class="btn btn-outline-secondary btn-sm ms-auto px-4 rounded-pill">Get Support</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-purple { background-color: #8b5cf6; }
+.text-purple { color: #8b5cf6; }
+.bg-grad-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+</style>
+{% endblock %}

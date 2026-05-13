@@ -1,43 +1,167 @@
 {% extends 'base.html' %}
 
-{% block title %}SkillHub - Find Services{% endblock %}
+{% block title %}SkillHub - Find Trusted Student Services{% endblock %}
 
 {% block content %}
-<div class="home-page py-4">
-    <div class="container">
-        <!-- 1. HERO SECTION -->
-        <div class="hero-section py-5 mb-5">
-            <div class="row align-items-center">
-                <div class="col-lg-7 text-center text-lg-start">
-                    <h1 class="display-4 fw-bold text-dark mb-3">
-                        Find the skills you need, <br>
-                        <span class="text-primary">from students you trust.</span>
+<div class="home-page">
+
+    <!-- ====== HERO SECTION ====== -->
+    <div class="hero-gradient-bg py-5 mb-5 mx-n3 mx-md-n4 px-3 px-md-4" style="margin-top:-3rem;">
+        <!-- Floating blobs -->
+        <div class="blob-1" style="top:10%;right:5%;"></div>
+        <div class="blob-2" style="bottom:5%;left:3%;"></div>
+
+        <div class="container py-4">
+            <div class="row align-items-center gy-5">
+                <div class="col-lg-7" data-aos="fade-right">
+                    <!-- Badge -->
+                    <div class="hero-badge-pill mb-3">
+                        <i class="fas fa-graduation-cap"></i>
+                        India's #1 Student Skill Marketplace
+                    </div>
+
+                    <!-- Headline -->
+                    <h1 style="font-family:'Poppins',sans-serif;font-size:clamp(2.2rem,5vw,3.5rem);font-weight:900;line-height:1.15;color:#0f172a !important;margin-bottom:1.2rem;">
+                        Find trusted
+                        <span style="background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">student services</span>
+                        near you
                     </h1>
-                    <p class="lead text-secondary mb-4">
-                        The hyperlocal marketplace for university talent. Hire peers, share your skills, and build your experience.
+
+                    <p style="font-size:1.1rem;color:#475569;max-width:520px;margin-bottom:2rem;font-weight:400;">
+                        Connect with talented students offering programming, tutoring, design, writing and more — all peer-verified and hyperlocal.
                     </p>
-                    <div class="d-flex justify-content-center justify-content-lg-start gap-3">
-                        <a href="{% url 'search' %}" class="btn btn-primary px-4">Find Services</a>
-                        <a href="{% url 'post_service' %}" class="btn btn-outline-secondary px-4">List a Skill</a>
+
+                    <!-- CTAs -->
+                    <div class="d-flex flex-wrap gap-3 mb-4">
+                        <a href="{% url 'search' %}" class="btn btn-gradient-primary px-5 py-3" style="font-size:1rem;border-radius:14px;">
+                            <i class="fas fa-search me-2"></i>Find Services
+                        </a>
+                        <a href="{% url 'post_service' %}" class="btn py-3 px-5" style="background:#fff;border:2px solid rgba(99,102,241,0.3);color:#6366f1;font-weight:700;border-radius:14px;font-size:1rem;">
+                            <i class="fas fa-plus me-2"></i>List a Skill
+                        </a>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="hero-stat-chip">
+                            <span class="stat-num">500+</span>
+                            <span class="stat-label">Services</span>
+                        </div>
+                        <div class="hero-stat-chip">
+                            <span class="stat-num">5</span>
+                            <span class="stat-label">Cities</span>
+                        </div>
+                        <div class="hero-stat-chip">
+                            <span class="stat-num">100%</span>
+                            <span class="stat-label">Students</span>
+                        </div>
                     </div>
                 </div>
-                <div class="col-lg-5 d-none d-lg-block">
-                    <div class="hero-illustration p-4 text-center">
-                        <i class="fas fa-rocket fa-10x text-primary opacity-25"></i>
+
+                <!-- Hero Illustration -->
+                <div class="col-lg-5 d-none d-lg-flex justify-content-center" data-aos="fade-left">
+                    <div style="position:relative;width:340px;height:340px;">
+                        <!-- Big circle -->
+                        <div style="width:320px;height:320px;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08));border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(99,102,241,0.15);">
+                            <i class="fas fa-rocket" style="font-size:7rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:float 3s ease-in-out infinite;"></i>
+                        </div>
+                        <!-- Floating mini cards -->
+                        <div class="animate-float" style="position:absolute;top:10px;right:-20px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 8px 24px rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.1);font-size:0.8rem;font-weight:600;color:#6366f1;animation-delay:0.5s;">
+                            <i class="fas fa-code me-1"></i> 120+ Dev Services
+                        </div>
+                        <div class="animate-float" style="position:absolute;bottom:30px;left:-30px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 8px 24px rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.15);font-size:0.8rem;font-weight:600;color:#059669;animation-delay:1s;">
+                            <i class="fas fa-star me-1" style="color:#fbbf24;"></i> Top Rated Students
+                        </div>
+                        <div class="animate-float" style="position:absolute;top:50%;right:-40px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 8px 24px rgba(236,72,153,0.12);border:1px solid rgba(236,72,153,0.12);font-size:0.8rem;font-weight:600;color:#db2777;animation-delay:1.5s;">
+                            <i class="fas fa-map-marker-alt me-1"></i> 5 Cities
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <style>
-            @keyframes pulse-glow {
-                0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-                70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); }
-                100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
-            }
-        </style>
+    <div class="container">
 
-        <!-- NEW: AI RECOMMENDED SERVICES -->
+        <!-- LOCATION + SEARCH + TYPE FILTER BAR -->
+
+        <div class="location-filter-bar" id="service-filter-bar">
+            <form method="get" action="{% url 'home' %}" class="row g-3 align-items-end">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-secondary text-uppercase" style="letter-spacing:.05em;">
+                        <i class="fas fa-search me-1"></i> Search Services
+                    </label>
+                    <input type="text" name="q" class="form-control" placeholder="e.g. Python tutoring, logo design..." value="{{ query }}">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-bold text-secondary text-uppercase" style="letter-spacing:.05em;">
+                        <i class="fas fa-map-marker-alt me-1 text-danger"></i> City
+                    </label>
+                    <select name="location" class="form-select" id="location-filter-select">
+                        <option value="">&#127757; All Locations</option>
+                        {% for loc_val, loc_name in location_choices %}
+                            <option value="{{ loc_val }}" {% if selected_location == loc_val %}selected{% endif %}>&#128205; {{ loc_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-bold text-secondary text-uppercase" style="letter-spacing:.05em;">
+                        <i class="fas fa-wifi me-1 text-success"></i> Service Type
+                    </label>
+                    <select name="service_type" class="form-select" id="service-type-filter">
+                        <option value="">&#9889; All Types</option>
+                        {% for type_val, type_name in service_type_choices %}
+                            <option value="{{ type_val }}" {% if selected_type == type_val %}selected{% endif %}>
+                                {% if type_val == 'Online' %}&#127760; {% else %}&#128205; {% endif %}{{ type_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-secondary text-uppercase" style="letter-spacing:.05em;">
+                        <i class="fas fa-tag me-1"></i> Category
+                    </label>
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        {% for cat_id, cat_name in categories %}
+                            <option value="{{ cat_id }}" {% if category == cat_id %}selected{% endif %}>{{ cat_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-12 d-grid">
+                    <button type="submit" class="btn btn-primary btn-filter">
+                        <i class="fas fa-filter me-1"></i> Filter
+                    </button>
+                </div>
+            </form>
+
+            {% if selected_location or category or query or selected_type %}
+            <div class="mt-3 d-flex align-items-center gap-2 flex-wrap">
+                <span class="text-secondary small">Active filters:</span>
+                {% if query %}
+                    <span class="active-filter-chip"><i class="fas fa-search"></i> "{{ query }}"</span>
+                {% endif %}
+                {% if selected_location %}
+                    <span class="active-filter-chip"><i class="fas fa-map-marker-alt"></i> {{ selected_location }}</span>
+                {% endif %}
+                {% if selected_type %}
+                    {% if selected_type == 'Online' %}
+                        <span class="active-filter-chip" style="background:#dcfce7;color:#166534;border-color:#bbf7d0;"><i class="fas fa-wifi"></i> Online</span>
+                    {% else %}
+                        <span class="active-filter-chip" style="background:#fee2e2;color:#991b1b;border-color:#fecaca;"><i class="fas fa-map-pin"></i> Offline</span>
+                    {% endif %}
+                {% endif %}
+                {% if category %}
+                    <span class="active-filter-chip"><i class="fas fa-tag"></i> {{ category }}</span>
+                {% endif %}
+                <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size:.8rem;">
+                    <i class="fas fa-times me-1"></i> Clear All
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- AI RECOMMENDED SERVICES -->
         {% if recommended_services %}
         <div id="recommended-services" class="mb-5 pt-4 border-top">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -66,9 +190,19 @@
                             </div>
                             <div class="card-body p-3">
                                 <h6 class="fw-bold mb-1 text-dark text-truncate">{{ service.title }}</h6>
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    {% if service.location %}
+                                        <span class="location-badge"><i class="fas fa-map-marker-alt"></i> {{ service.location }}</span>
+                                    {% endif %}
+                                    {% if service.service_type == 'Online' %}
+                                        <span class="type-badge-online"><i class="fas fa-wifi"></i> Online</span>
+                                    {% elif service.service_type == 'Offline' %}
+                                        <span class="type-badge-offline"><i class="fas fa-map-pin"></i> Offline</span>
+                                    {% endif %}
+                                </div>
                                 <div class="price mb-2 small">
                                     {% if service.payment_type == 'free' %}<span class="text-success fw-bold">Free</span>
-                                    {% elif service.payment_type == 'paid' %}<span class="text-success fw-bold">₹{{ service.price|default:"0"|floatformat:0 }}</span>
+                                    {% elif service.payment_type == 'paid' %}<span class="text-success fw-bold">&#8377;{{ service.price|default:"0"|floatformat:0 }}</span>
                                     {% else %}<span class="text-info fw-bold">Negotiable</span>{% endif %}
                                 </div>
                                 <a href="{% url 'service_detail' service.pk %}" class="btn btn-outline-primary btn-sm w-100">View Details</a>
@@ -84,17 +218,28 @@
         <div id="featured-services" class="mb-5 pt-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold mb-0">
-                    <i class="fas fa-star text-warning me-2"></i> {% if category %}Search Results{% else %}Featured Services{% endif %}
+                    <i class="fas fa-star text-warning me-2"></i>
+                    {% if selected_location and query %}
+                        "{{ query }}" in {{ selected_location }}
+                    {% elif selected_location %}
+                        Services in {{ selected_location }}
+                    {% elif query %}
+                        Results for "{{ query }}"
+                    {% elif category %}
+                        {{ category|title }} Services
+                    {% else %}
+                        Featured Services
+                    {% endif %}
                 </h3>
-                {% if category %}
-                    <a href="{% url 'home' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">Clear Filter</a>
+                {% if selected_location or category or query or selected_type %}
+                    <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Clear Filter</a>
                 {% else %}
                     <a href="{% url 'search' %}" class="text-info-emphasis fw-medium text-decoration-none small">View all <i class="fas fa-chevron-right ms-1"></i></a>
                 {% endif %}
             </div>
 
             <div class="row g-4">
-                {% for service in services|slice:":6" %}
+                {% for service in services|slice:":9" %}
                     <div class="col-lg-4 col-md-6">
                         <div class="card h-100 border-light shadow-sm">
                             <div class="card-img-top position-relative overflow-hidden" style="height: 200px;">
@@ -119,11 +264,26 @@
 
                             <div class="card-body p-3">
                                 <h5 class="fw-bold mb-1 text-dark">{{ service.title }}</h5>
+
+                                <!-- Location + Type Badges -->
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    {% if service.location %}
+                                        <span class="location-badge">
+                                            <i class="fas fa-map-marker-alt"></i> {{ service.location }}
+                                        </span>
+                                    {% endif %}
+                                    {% if service.service_type == 'Online' %}
+                                        <span class="type-badge-online"><i class="fas fa-wifi"></i> Online</span>
+                                    {% elif service.service_type == 'Offline' %}
+                                        <span class="type-badge-offline"><i class="fas fa-map-pin"></i> Offline</span>
+                                    {% endif %}
+                                </div>
+
                                 <div class="price mb-2">
                                     {% if service.payment_type == 'free' %}
                                         <span class="text-success fw-bold">Free</span>
                                     {% elif service.payment_type == 'paid' %}
-                                        <span class="text-success fw-bold">₹{{ service.price|default:"0"|floatformat:0 }}</span>
+                                        <span class="text-success fw-bold">&#8377;{{ service.price|default:"0"|floatformat:0 }}</span>
                                     {% else %}
                                         <span class="text-info fw-bold">Negotiable</span>
                                     {% endif %}
@@ -132,9 +292,6 @@
                                     <div class="provider text-secondary small">
                                         <i class="fas fa-user-circle me-1"></i> {% if service.user %}{{ service.user.username }}{% else %}Unknown{% endif %}
                                     </div>
-                                    <div class="ms-auto text-secondary small">
-                                        <i class="fas fa-map-marker-alt me-1 text-danger"></i> {{ service.location|default:"Online" }}
-                                    </div>
                                 </div>
                                 <div class="pt-2 border-top">
                                     <a href="{% url 'service_detail' service.pk %}" class="btn btn-primary btn-sm w-100">View Service</a>
@@ -142,51 +299,73 @@
                             </div>
                         </div>
                     </div>
-                {% empty %}
-                    <div class="col-12 text-center py-5">
-                        <h3 class="fw-bold text-dark mb-2">No services found</h3>
-                        <a href="{% url 'post_service' %}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">Create First Service</a>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="empty-state-modern" data-aos="fade-up">
+                            <span class="empty-icon">🔍</span>
+                            <h4>No services found</h4>
+                            <p>
+                                {% if selected_location %}No approved services in <strong>{{ selected_location }}</strong> yet.{% elif selected_type %}No <strong>{{ selected_type }}</strong> services match your filters.{% else %}No matching services found. Be the first!{% endif %}
+                            </p>
+                            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                <a href="{% url 'home' %}" class="btn btn-outline-primary rounded-pill px-4"><i class="fas fa-times me-1"></i>Clear Filters</a>
+                                <a href="{% url 'post_service' %}" class="btn btn-gradient-primary rounded-pill px-4"><i class="fas fa-plus me-1"></i>Post a Service</a>
+                            </div>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- 3. CATEGORIES SECTION -->
-        <div class="mb-5 pt-5 border-top border-dark border-opacity-10">
-            <div class="text-center mb-5">
-                <h3 class="fw-bold text-dark mb-2">Browse by Category</h3>
-                <p class="text-dark-50">Find exactly what you're looking for across all disciplines.</p>
+        <!-- ====== CATEGORIES SECTION ====== -->
+        <div class="mb-5 pt-5 border-top" style="border-color:rgba(99,102,241,0.1) !important;">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <div class="hero-badge-pill mx-auto d-inline-flex mb-3">
+                    <i class="fas fa-th-large"></i> Browse by Expertise
+                </div>
+                <h2 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:2rem;color:#0f172a;">Explore <span style="background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">Every Category</span></h2>
+                <p class="text-secondary">Find exactly what you need across all disciplines.</p>
             </div>
 
-            <div class="row g-3 justify-content-center">
+            <div class="row g-3">
                 {% for cat_id, cat_name in categories %}
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <a href="?category={{ cat_id }}" class="text-decoration-none d-block">
-                            <div class="card p-4 text-center h-100 {% if category == cat_id %}border-primary bg-primary bg-opacity-10{% endif %}">
-                                <div class="text-info fs-3 mb-3">
-                                    {% if cat_id == 'programming' or cat_id == 'web_dev' or cat_id == 'app_dev' %}
-                                        <i class="fas fa-code icon-blue"></i>
-                                    {% elif cat_id == 'graphic_design' or cat_id == 'video_editing' %}
-                                        <i class="fas fa-paint-brush icon-purple"></i>
-                                    {% elif cat_id == 'tutoring' or cat_id == 'assignment' %}
-                                        <i class="fas fa-book-open icon-green"></i>
-                                    {% else %}
-                                        <i class="fas fa-lightbulb icon-orange"></i>
-                                    {% endif %}
-                                </div>
-                                <h6 class="text-dark fw-bold mb-0 {% if category == cat_id %}text-primary{% endif %}">{{ cat_name }}</h6>
+                    {% with delay=forloop.counter0|add:0 %}
+                    <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}0">
+                        <a href="?category={{ cat_id }}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_type %}&service_type={{ selected_type }}{% endif %}" class="category-card p-4 text-center h-100 {% if category == cat_id %}border-primary{% endif %}">
+                            <div class="mx-auto mb-3 category-icon-box
+                                {% if cat_id == 'programming' %}cat-prog
+                                {% elif cat_id == 'web_dev' %}cat-web
+                                {% elif cat_id == 'app_dev' %}cat-app
+                                {% elif cat_id == 'graphic_design' %}cat-design
+                                {% elif cat_id == 'video_editing' %}cat-video
+                                {% elif cat_id == 'writing' %}cat-writing
+                                {% elif cat_id == 'tutoring' %}cat-tutor
+                                {% elif cat_id == 'assignment' %}cat-assign
+                                {% elif cat_id == 'presentation' %}cat-pres
+                                {% elif cat_id == 'resume' %}cat-resume
+                                {% elif cat_id == 'exam_prep' %}cat-exam
+                                {% else %}cat-other{% endif %}">
+                                <i class="fas
+                                    {% if cat_id == 'programming' %}fa-code
+                                    {% elif cat_id == 'web_dev' %}fa-globe
+                                    {% elif cat_id == 'app_dev' %}fa-mobile-alt
+                                    {% elif cat_id == 'graphic_design' %}fa-paint-brush
+                                    {% elif cat_id == 'video_editing' %}fa-film
+                                    {% elif cat_id == 'writing' %}fa-pen-nib
+                                    {% elif cat_id == 'tutoring' %}fa-chalkboard-teacher
+                                    {% elif cat_id == 'assignment' %}fa-tasks
+                                    {% elif cat_id == 'presentation' %}fa-presentation
+                                    {% elif cat_id == 'resume' %}fa-file-alt
+                                    {% elif cat_id == 'exam_prep' %}fa-book-open
+                                    {% else %}fa-lightbulb{% endif %}"></i>
                             </div>
+                            <h6 class="fw-bold mb-0" style="color:{% if category == cat_id %}#6366f1{% else %}#1e293b{% endif %};">{{ cat_name }}</h6>
                         </a>
                     </div>
+                    {% endwith %}
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .tracking-tight {
-        letter-spacing: -0.025em;
-    }
-</style>
 {% endblock %}

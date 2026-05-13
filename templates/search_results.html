@@ -22,7 +22,7 @@
                             <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Keyword</label>
                             <input type="text" name="q" class="form-control" placeholder="Searching for..." value="{{ query }}">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Category</label>
                             <select name="category" class="form-select">
                                 <option value="">All Expertise</option>
@@ -31,13 +31,31 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Max Price (₹)</label>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1"><i class="fas fa-map-marker-alt me-1 text-danger"></i> City</label>
+                            <select name="location" class="form-select">
+                                <option value="">All Locations</option>
+                                {% for loc_val, loc_name in location_choices %}
+                                    <option value="{{ loc_val }}" {% if location == loc_val %}selected{% endif %}>{{ loc_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1"><i class="fas fa-wifi me-1 text-success"></i> Type</label>
+                            <select name="service_type" class="form-select">
+                                <option value="">All Types</option>
+                                {% for type_val, type_name in service_type_choices %}
+                                    <option value="{{ type_val }}" {% if service_type == type_val %}selected{% endif %}>{{ type_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label small fw-bold text-dark-50 text-uppercase tracking-wider ms-1">Max &#8377;</label>
                             <input type="number" name="max_price" class="form-control" placeholder="Any" value="{{ max_price }}">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow-sm">
-                                <i class="fas fa-search me-2"></i>Refine Pursuit
+                                <i class="fas fa-search me-2"></i>Filter
                             </button>
                         </div>
                     </div>
@@ -77,14 +95,31 @@
                                 </div>
 
                                 <div class="card-body p-4 d-flex flex-column">
-                                    <h6 class="fw-bold mb-3 text-dark fs-5">{{ service.title }}</h6>
-                                    
+                                    <h6 class="fw-bold mb-2 text-dark fs-5">{{ service.title }}</h6>
+
+                                    <div class="d-flex flex-wrap gap-1 mb-3">
+                                        {% if service.location %}
+                                        <span style="display:inline-flex;align-items:center;gap:4px;background:#dbeafe;color:#1d4ed8;padding:4px 10px;border-radius:20px;font-size:0.78rem;font-weight:600;">
+                                            <i class="fas fa-map-marker-alt"></i> {{ service.location }}
+                                        </span>
+                                        {% endif %}
+                                        {% if service.service_type == 'Online' %}
+                                        <span style="display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#166534;padding:4px 10px;border-radius:20px;font-size:0.78rem;font-weight:600;">
+                                            <i class="fas fa-wifi"></i> Online
+                                        </span>
+                                        {% elif service.service_type == 'Offline' %}
+                                        <span style="display:inline-flex;align-items:center;gap:4px;background:#fee2e2;color:#991b1b;padding:4px 10px;border-radius:20px;font-size:0.78rem;font-weight:600;">
+                                            <i class="fas fa-map-pin"></i> Offline
+                                        </span>
+                                        {% endif %}
+                                    </div>
+
                                     <div class="mb-4">
                                         <div class="service-meta">
                                             <i class="fas fa-tag icon-blue"></i>
                                             <span>
                                                 {% if service.payment_type == 'free' %}Free
-                                                {% elif service.payment_type == 'paid' %}₹{{ service.price|default:"Not set"|floatformat:0 }}
+                                                {% elif service.payment_type == 'paid' %}&#8377;{{ service.price|default:"Not set"|floatformat:0 }}
                                                 {% else %}Negotiable{% endif %}
                                             </span>
                                         </div>

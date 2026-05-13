@@ -2,36 +2,50 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q, Avg, Sum, Count
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
 import json
-from .models import UserProfile, Service, HelpRequest, Message, Review, Request, CATEGORY_CHOICES, Payment, Notification
+from .models import UserProfile, Service, HelpRequest, Message, Review, Request, CATEGORY_CHOICES, LOCATION_CHOICES, SERVICE_TYPE_CHOICES, Payment, Notification
 from .forms import UserRegisterForm, UserProfileForm, ServiceForm, HelpRequestForm, MessageForm, ReviewForm, RequestForm
 
 
 def home(request):
     category = request.GET.get('category')
-    services = Service.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-created_at')
-    
+    selected_location = request.GET.get('location', '')
+    selected_type = request.GET.get('service_type', '')
+    query = request.GET.get('q', '')
+
+    services = Service.objects.filter(is_approved=True).annotate(avg_rating=Avg('reviews__rating')).order_by('-created_at')
+
     if category:
         services = services.filter(category=category)
-        
+
+    if selected_location:
+        services = services.filter(location=selected_location)
+
+    if selected_type:
+        services = services.filter(service_type=selected_type)
+
+    if query:
+        services = services.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )
+
     # --- AI RECOMMENDATION LOGIC ---
     recommended_services = []
     if request.user.is_authenticated:
         user_profile = getattr(request.user, 'profile', None)
         if user_profile and user_profile.skills_offered:
-            # Recommend services that complement their skills or are highly rated
             user_skills = [s.strip().lower() for s in user_profile.skills_offered.split(',')]
             recommended_services = Service.objects.annotate(
                 avg_rating=Avg('reviews__rating')
             ).filter(avg_rating__gte=4.0).exclude(user=request.user).order_by('-avg_rating')[:4]
-            
+
         if not recommended_services:
-            # Fallback based on location
             if user_profile and user_profile.location:
                 recommended_services = Service.objects.annotate(
                     avg_rating=Avg('reviews__rating')
@@ -41,6 +55,11 @@ def home(request):
         'services': services,
         'category': category,
         'categories': CATEGORY_CHOICES,
+        'location_choices': LOCATION_CHOICES,
+        'service_type_choices': SERVICE_TYPE_CHOICES,
+        'selected_location': selected_location,
+        'selected_type': selected_type,
+        'query': query,
         'recommended_services': recommended_services
     }
     return render(request, 'home.html', context)
@@ -347,11 +366,12 @@ def search(request):
     query = request.GET.get('q', '')
     category = request.GET.get('category', '')
     location = request.GET.get('location', '')
+    service_type = request.GET.get('service_type', '')
     max_price = request.GET.get('max_price', '')
-    
-    results_services = Service.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-created_at')
+
+    results_services = Service.objects.filter(is_approved=True).annotate(avg_rating=Avg('reviews__rating')).order_by('-created_at')
     results_requests = HelpRequest.objects.all()
-    
+
     if query:
         results_services = results_services.filter(
             Q(title__icontains=query) | Q(description__icontains=query)
@@ -359,24 +379,30 @@ def search(request):
         results_requests = results_requests.filter(
             Q(title__icontains=query) | Q(description__icontains=query)
         )
-        
+
     if category:
         results_services = results_services.filter(category=category)
         results_requests = results_requests.filter(category=category)
 
     if location:
         results_services = results_services.filter(location__icontains=location)
-        
+
+    if service_type:
+        results_services = results_services.filter(service_type=service_type)
+
     if max_price and max_price.isdigit():
         results_services = results_services.filter(price__lte=max_price)
-        
+
     context = {
         'query': query,
         'location': location,
+        'service_type': service_type,
         'max_price': max_price,
         'results_services': results_services,
         'results_requests': results_requests,
         'categories': CATEGORY_CHOICES,
+        'location_choices': LOCATION_CHOICES,
+        'service_type_choices': SERVICE_TYPE_CHOICES,
         'selected_category': category
     }
     return render(request, 'search_results.html', context)
@@ -613,25 +639,110 @@ def fetch_new_messages(request, request_id):
         })
     return JsonResponse({'messages': data})
 
+
+@login_required
+def my_hub(request):
+    """View to manage user's active services and posted needs."""
+    user_services = Service.objects.filter(user=request.user)
+    user_requests = HelpRequest.objects.filter(user=request.user)
+    return render(request, 'my_services.html', {
+        'user_services': user_services,
+        'user_requests': user_requests
+    })
+
+@login_required
+def payment_history(request):
+    """Show history of payments paid and earned."""
+    payments = Payment.objects.filter(
+        Q(user=request.user) | Q(service__user=request.user)
+    ).select_related('user', 'service', 'request').distinct()
+    return render(request, 'payments_list.html', {'payments': payments})
+
 # --- ADMIN DASHBOARD ---
-@staff_member_required
-def admin_panel(request):
-    users_count = User.objects.count()
-    services_count = Service.objects.count()
-    requests_count = Request.objects.count()
+@login_required
+def admin_dashboard(request):
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, "Permission denied. Admins only.")
+        return redirect('home')
+    
+    total_users = User.objects.count()
+    total_services = Service.objects.count()
+    total_requests = Request.objects.count()
     
     total_revenue = Payment.objects.filter(status='success').aggregate(Sum('amount'))['amount__sum'] or 0
     
-    recent_users = User.objects.order_by('-date_joined')[:5]
+    users = User.objects.all().order_by('-date_joined')
+    services = Service.objects.select_related('user').order_by('-created_at')
+    requests = Request.objects.select_related('sender', 'receiver', 'service').order_by('-created_at')
+    
     recent_payments = Payment.objects.filter(status='success').order_by('-timestamp')[:5]
     
     context = {
-        'users_count': users_count,
-        'services_count': services_count,
-        'requests_count': requests_count,
+        'total_users': total_users,
+        'total_services': total_services,
+        'total_requests': total_requests,
         'total_revenue': total_revenue,
-        'recent_users': recent_users,
+        'users': users,
+        'services': services,
+        'requests': requests,
         'recent_payments': recent_payments,
     }
     return render(request, 'admin_dashboard.html', context)
+
+@login_required
+def approve_service(request, pk):
+    if not request.user.is_staff and not request.user.is_superuser:
+        return redirect('home')
+    service = get_object_or_404(Service, pk=pk)
+    service.is_approved = True
+    service.save()
+    messages.success(request, f"Service '{service.title}' has been approved.")
+    return redirect('admin_dashboard')
+
+@login_required
+def reject_service(request, pk):
+    if not request.user.is_staff and not request.user.is_superuser:
+        return redirect('home')
+    service = get_object_or_404(Service, pk=pk)
+    service.is_approved = False
+    service.save()
+    messages.warning(request, f"Service '{service.title}' has been rejected.")
+    return redirect('admin_dashboard')
+
+@login_required
+def delete_service_admin(request, pk):
+    if not request.user.is_staff and not request.user.is_superuser:
+        return redirect('home')
+    service = get_object_or_404(Service, pk=pk)
+    title = service.title
+    service.delete()
+    messages.error(request, f"Service '{title}' has been permanently deleted.")
+    return redirect('admin_dashboard')
+
+@login_required
+def deactivate_user(request, pk):
+    if not request.user.is_staff and not request.user.is_superuser:
+        return redirect('home')
+    target_user = get_object_or_404(User, pk=pk)
+    if target_user.is_superuser:
+        messages.error(request, "Cannot deactivate a superuser.")
+    else:
+        target_user.is_active = not target_user.is_active
+        target_user.save()
+        status = "deactivated" if not target_user.is_active else "activated"
+        messages.success(request, f"User {target_user.username} has been {status}.")
+    return redirect('admin_dashboard')
+
+@login_required
+def delete_user_admin(request, pk):
+    if not request.user.is_staff and not request.user.is_superuser:
+        return redirect('home')
+    target_user = get_object_or_404(User, pk=pk)
+    if target_user.is_superuser:
+        messages.error(request, "Cannot delete a superuser.")
+    else:
+        username = target_user.username
+        target_user.delete()
+        messages.error(request, f"User {username} and all their data have been deleted.")
+    return redirect('admin_dashboard')
 

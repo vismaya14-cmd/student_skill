@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import UserProfile, Service, HelpRequest, Message, Review, Request
+from .models import UserProfile, Service, HelpRequest, Message, Review, Request, LOCATION_CHOICES, SERVICE_TYPE_CHOICES
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -50,12 +50,19 @@ class ServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        fields = ['title', 'description', 'category', 'custom_category', 'image', 'payment_type', 'price', 'location', 'payment_method', 'delivery_time']
+        fields = ['title', 'description', 'category', 'custom_category', 'image', 'payment_type', 'price', 'location', 'service_type', 'payment_method', 'delivery_time']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Enter a catchy title for your service'}),
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe what you offer in detail...'}),
             'price': forms.NumberInput(attrs={'placeholder': '0.00'}),
-            'location': forms.TextInput(attrs={'placeholder': 'e.g., Main Campus, Library, Study Hall'}),
+            'location': forms.Select(
+                choices=[('', '— Select City —')] + list(LOCATION_CHOICES),
+                attrs={'class': 'form-select'}
+            ),
+            'service_type': forms.Select(
+                choices=SERVICE_TYPE_CHOICES,
+                attrs={'class': 'form-select', 'id': 'id_service_type'}
+            ),
             'payment_method': forms.Select(attrs={'class': 'form-select'}),
             'delivery_time': forms.Select(attrs={'class': 'form-select'}),
         }
@@ -63,8 +70,12 @@ class ServiceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['payment_type'].required = True
+        self.fields['location'].required = True
+        self.fields['service_type'].required = True
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
+        self.fields['location'].widget.attrs.update({'class': 'form-select'})
+        self.fields['service_type'].widget.attrs.update({'class': 'form-select'})
         self.fields['category'].widget.attrs.update({'id': 'id_category'})
         self.fields['custom_category'].widget.attrs.update({'id': 'id_custom_category'})
         self.fields['payment_type'].widget.attrs.update({'id': 'id_payment_type'})

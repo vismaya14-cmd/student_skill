@@ -58,8 +58,17 @@
                                 {{ form.category }}
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">Location / Venue</label>
+                                <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">
+                                    <i class="fas fa-map-marker-alt me-1 text-danger"></i> City / Location
+                                </label>
                                 {{ form.location }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-secondary text-uppercase tracking-wider">
+                                    <i class="fas fa-wifi me-1 text-success"></i> Service Type
+                                </label>
+                                {{ form.service_type }}
+                                <div class="form-text extra-small opacity-50">Is this service delivered online or in-person?</div>
                             </div>
                             <div class="col-12" id="custom_category_wrapper" style="display: none;">
                                 <div class="p-3 rounded-4 bg-info bg-opacity-10 border border-info border-opacity-25">

@@ -4,144 +4,324 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SkillHub Dashboard{% endblock %}</title>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom Style -->
+    <!-- AOS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
+
     <style>
+        /* ===== DASHBOARD LAYOUT ===== */
+        *, *::before, *::after { box-sizing: border-box; }
+
         body {
+            font-family: 'Poppins', 'Inter', sans-serif !important;
+            background: #f0f2ff !important;
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        /* Fixed Dashboard Layout */
+
         .dashboard-wrapper {
             display: flex;
             min-height: 100vh;
         }
-        
+
+        /* ===== SIDEBAR ===== */
         .dashboard-sidebar {
-            width: 280px;
-            background: #ffffff;
-            border-right: 1px solid #e2e8f0;
+            width: 272px;
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            border-right: 1px solid rgba(99,102,241,0.15);
             position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
+            top: 0; bottom: 0; left: 0;
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            padding: 2rem 1.5rem;
+            padding: 1.75rem 1.25rem;
             transition: transform 0.3s ease;
+            overflow-y: auto;
         }
 
-        .dashboard-main {
-            flex: 1;
-            margin-left: 280px;
-            padding: 3rem;
-            width: calc(100% - 280px);
-            background: #f1f5f9;
-            min-height: 100vh;
+        /* Sidebar glow top bar */
+        .dashboard-sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
         }
 
         .brand-logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #1e293b;
-            text-decoration: none;
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 3rem;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .brand-logo .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+            flex-shrink: 0;
+        }
+        .brand-logo .logo-icon i { color: white !important; }
+
+        .brand-logo .logo-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a5b4fc, #c4b5fd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        /* User profile mini */
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            margin-bottom: 1.5rem;
+        }
+        .sidebar-avatar {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .sidebar-avatar i { color: white !important; }
+        .sidebar-profile .name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            display: block;
+            line-height: 1.2;
+        }
+        .sidebar-profile .role {
+            font-size: 0.72rem;
+            color: #a5b4fc;
+            font-weight: 500;
+        }
+
+        /* Nav section label */
+        .nav-section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #4b5563;
+            padding: 0.5rem 1rem 0.25rem;
+            margin-top: 0.5rem;
         }
 
         .nav-link-custom {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 0.875rem 1.25rem;
-            color: #64748b;
+            gap: 0.875rem;
+            padding: 0.75rem 1rem;
+            color: #94a3b8;
             text-decoration: none;
             font-weight: 500;
+            font-size: 0.88rem;
             border-radius: 12px;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
+            margin-bottom: 2px;
+            position: relative;
         }
+
+        .nav-link-custom .nav-icon {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+        .nav-link-custom .nav-icon i { color: #94a3b8 !important; }
 
         .nav-link-custom:hover {
-            background: #f8fafc;
-            color: #2563eb;
+            color: #e2e8f0;
+            background: rgba(255,255,255,0.06);
         }
+        .nav-link-custom:hover .nav-icon { background: rgba(99,102,241,0.2); }
+        .nav-link-custom:hover .nav-icon i { color: #a5b4fc !important; }
 
         .nav-link-custom.active {
-            background: #eff6ff !important;
-            color: #2563eb !important;
-            font-weight: 600;
+            color: #ffffff !important;
+            background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.2)) !important;
+            border: 1px solid rgba(99,102,241,0.3);
+            box-shadow: 0 4px 15px rgba(99,102,241,0.15);
         }
-        
+        .nav-link-custom.active .nav-icon {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+        }
+        .nav-link-custom.active .nav-icon i { color: white !important; }
+
+        /* ===== MAIN CONTENT ===== */
+        .dashboard-main {
+            flex: 1;
+            margin-left: 272px;
+            padding: 2.5rem;
+            width: calc(100% - 272px);
+            background: transparent;
+            min-height: 100vh;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 992px) {
-            .dashboard-sidebar { transform: translateX(-100%); width: 0; }
+            .dashboard-sidebar { transform: translateX(-100%); }
             .dashboard-main { margin-left: 0; width: 100%; padding: 1.5rem; }
+            .sidebar-show .dashboard-sidebar { transform: translateX(0); }
         }
+
+        /* Notification badge in nav */
+        .nav-notif {
+            margin-left: auto;
+            background: #ef4444;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Logout button */
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.75rem 1rem;
+            color: #f87171;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.1); }
+        .logout-btn i { color: #f87171 !important; }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <!-- Sidebar -->
-        <aside class="dashboard-sidebar">
+    <div class="dashboard-wrapper" id="dashWrapper">
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="dashboard-sidebar" id="dashSidebar">
+            <!-- Brand -->
             <a href="{% url 'home' %}" class="brand-logo">
-                <i class="fas fa-rocket"></i> SkillHub
+                <div class="logo-icon"><i class="fas fa-rocket"></i></div>
+                <span class="logo-text">SkillHub</span>
             </a>
-            
+
+            <!-- User Profile Mini -->
+            <div class="sidebar-profile">
+                <div class="sidebar-avatar"><i class="fas fa-user"></i></div>
+                <div>
+                    <span class="name">{{ user.get_full_name|default:user.username }}</span>
+                    <span class="role">Student Freelancer</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
             <nav class="flex-grow-1">
-                <ul class="nav-menu">
-                    <li class="nav-item">
+                <div class="nav-section-label">Main</div>
+                <ul class="list-unstyled mb-0">
+                    <li>
                         <a href="{% url 'dashboard' %}" class="nav-link-custom {% if request.path == '/dashboard/' %}active{% endif %}">
-                            <i class="fas fa-th-large"></i> Dashboard
+                            <div class="nav-icon"><i class="fas fa-th-large"></i></div>
+                            Dashboard
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li>
                         <a href="{% url 'services' %}" class="nav-link-custom {% if request.path == '/services/' %}active{% endif %}">
-                            <i class="fas fa-tools"></i> Services
+                            <div class="nav-icon"><i class="fas fa-store"></i></div>
+                            Marketplace
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{% url 'inbox' %}" class="nav-link-custom d-flex justify-content-between align-items-center {% if request.path == '/inbox/' %}active{% endif %}">
-                            <span><i class="fas fa-inbox me-2"></i> Inbox</span>
+                    <li>
+                        <a href="{% url 'my_hub' %}" class="nav-link-custom {% if request.path == '/hub/' %}active{% endif %}">
+                            <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
+                            My Hub
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="nav-section-label">Communication</div>
+                <ul class="list-unstyled mb-0">
+                    <li>
+                        <a href="{% url 'inbox' %}" class="nav-link-custom {% if request.path == '/inbox/' %}active{% endif %}">
+                            <div class="nav-icon"><i class="fas fa-inbox"></i></div>
+                            Inbox
                             {% if unread_notifications_count > 0 %}
-                            <span class="badge bg-danger rounded-pill">{{ unread_notifications_count }}</span>
+                            <span class="nav-notif">{{ unread_notifications_count }}</span>
                             {% endif %}
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{% url 'dashboard' %}" class="nav-link-custom {% if request.path == '/payments/' %}active{% endif %}">
-                            <i class="fas fa-wallet"></i> Payments
+                    <li>
+                        <a href="{% url 'payment_history' %}" class="nav-link-custom {% if request.path == '/payments/' %}active{% endif %}">
+                            <div class="nav-icon"><i class="fas fa-wallet"></i></div>
+                            Payments
                         </a>
                     </li>
-                    <li class="nav-item">
+                </ul>
+
+                <div class="nav-section-label">Account</div>
+                <ul class="list-unstyled mb-0">
+                    <li>
                         <a href="{% url 'profile' user.username %}" class="nav-link-custom {% if '/profile/' in request.path %}active{% endif %}">
-                            <i class="fas fa-user-circle"></i> Profile
+                            <div class="nav-icon"><i class="fas fa-user-circle"></i></div>
+                            Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'edit_profile' %}" class="nav-link-custom">
+                            <div class="nav-icon"><i class="fas fa-cog"></i></div>
+                            Settings
                         </a>
                     </li>
                 </ul>
             </nav>
-            
-            <div class="pt-4 border-top">
+
+            <!-- Logout -->
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:1rem;margin-top:1rem;">
                 <form action="{% url 'logout' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="nav-link-custom border-0 bg-transparent w-100 text-start text-danger">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Sign Out
                     </button>
                 </form>
             </div>
         </aside>
 
-        <!-- Main Content -->
+        <!-- ===== MAIN CONTENT ===== -->
         <main class="dashboard-main">
             {% block content %}{% endblock %}
         </main>
@@ -149,6 +329,11 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 650, once: true, offset: 40 });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

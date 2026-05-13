@@ -1,183 +1,666 @@
 {% extends 'dashboard_base.html' %}
 {% load static %}
 
-{% block title %}SkillHub - Pictorial Dashboard{% endblock %}
+{% block title %}SkillHub — Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ================================================================
+   DASHBOARD PAGE  —  Crystal-clear, Stripe-inspired design
+   NO backdrop-filter blur. NO faded text. NO heavy shadows.
+   ================================================================ */
+
+.dashboard-page { padding-bottom: 3rem; }
+
+/* ---- HERO BANNER ---- */
+.dash-hero {
+    background: linear-gradient(135deg, #312e81 0%, #4c1d95 45%, #9d174d 100%);
+    border-radius: 20px;
+    padding: 2.25rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(49,46,129,0.38);
+}
+/* Subtle decorative circles — purely visual, not over text */
+.dash-hero::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 280px; height: 280px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.dash-hero::after {
+    content: '';
+    position: absolute; bottom: -90px; left: 38%;
+    width: 240px; height: 240px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Floating bg icons — kept very faint so they never overlap text */
+.dash-hero .float-icon {
+    position: absolute;
+    font-size: 1.5rem;
+    opacity: 0.1;
+    pointer-events: none;
+    animation: floatUp 5s ease-in-out infinite;
+}
+@keyframes floatUp {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-10px); }
+}
+
+/* Hero text block */
+.hero-text-block { position: relative; z-index: 3; }
+
+.hero-tag {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.82);
+    margin-bottom: .35rem;
+}
+.dash-hero h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.45rem, 2.8vw, 2.1rem);
+    color: #ffffff;
+    margin-bottom: .3rem;
+    line-height: 1.2;
+    /* NO text-shadow — sharp rendering */
+}
+.dash-hero .hero-sub {
+    font-size: .92rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.88);
+    margin-bottom: 0;
+}
+
+/* Avatar circle — solid, no blur */
+.hero-avatar {
+    width: 68px; height: 68px;
+    background: rgba(255,255,255,0.18);
+    border: 2.5px solid rgba(255,255,255,0.38);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem;
+    flex-shrink: 0;
+    position: relative; z-index: 3;
+    /* NO backdrop-filter */
+}
+.hero-avatar i { color: #ffffff !important; }
+
+/* Hero buttons */
+.hero-btn-outline {
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    color: #ffffff;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: .84rem;
+    padding: .55rem 1.1rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    transition: background .2s;
+    /* NO backdrop-filter */
+}
+.hero-btn-outline:hover {
+    background: rgba(255,255,255,0.26);
+    color: #ffffff;
+}
+.hero-btn-solid {
+    background: #ffffff;
+    border: none;
+    color: #4c1d95;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: .84rem;
+    padding: .55rem 1.1rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    transition: background .2s;
+}
+.hero-btn-solid:hover {
+    background: #f0e7ff;
+    color: #4c1d95;
+}
+
+/* ================================================================
+   STAT CARDS — Clean solid-gradient, sharp white text
+   ================================================================ */
+.stat-card {
+    border-radius: 18px;
+    padding: 1.5rem;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+    transition: transform .25s ease, box-shadow .25s ease;
+    /* NO filter:blur, NO backdrop-filter */
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 48px rgba(0,0,0,0.22) !important;
+}
+
+/* Decorative inner circle — does NOT sit over text */
+.stat-card .sc-deco {
+    position: absolute;
+    bottom: -24px; right: -24px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Icon box — solid background, no blur */
+.stat-card .sc-icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.22);
+    border: 1.5px solid rgba(255,255,255,0.32);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.35rem;
+    margin-bottom: .9rem;
+    /* NO backdrop-filter */
+}
+.stat-card .sc-icon i { color: #ffffff !important; }
+
+/* Stats number */
+.stat-card .sc-num {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: .35rem;
+    /* Sharp — no text-shadow distorting crisp rendering */
+}
+
+/* Stats label */
+.stat-card .sc-label {
+    font-size: .8rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.92);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+/* Progress bar */
+.sc-bar {
+    height: 5px;
+    background: rgba(255,255,255,0.22);
+    border-radius: 10px;
+    margin-top: .9rem;
+    overflow: hidden;
+}
+.sc-bar-fill {
+    height: 100%;
+    background: rgba(255,255,255,0.85);
+    border-radius: 10px;
+    transition: width 1.2s ease;
+}
+
+/* Gradient backgrounds — deep, saturated for white text */
+.gc-blue   { background: linear-gradient(135deg, #1e40af, #3b82f6); box-shadow: 0 8px 28px rgba(30,64,175,0.38); }
+.gc-green  { background: linear-gradient(135deg, #065f46, #10b981); box-shadow: 0 8px 28px rgba(6,95,70,0.38); }
+.gc-amber  { background: linear-gradient(135deg, #92400e, #d97706); box-shadow: 0 8px 28px rgba(146,64,14,0.38); }
+.gc-violet { background: linear-gradient(135deg, #4c1d95, #8b5cf6); box-shadow: 0 8px 28px rgba(76,29,149,0.38); }
+
+/* ================================================================
+   SECTION HEADING
+   ================================================================ */
+.sec-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-bottom: 1.1rem;
+}
+.sec-title .s-pill {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem;
+    flex-shrink: 0;
+}
+
+/* ================================================================
+   QUICK ACTION CARDS
+   ================================================================ */
+.qa-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.4rem 1rem;
+    text-align: center;
+    border: 1.5px solid #e5e7eb;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    text-decoration: none;
+    display: block;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.qa-card:hover {
+    transform: translateY(-4px);
+    border-color: #a5b4fc;
+    box-shadow: 0 10px 30px rgba(99,102,241,0.14);
+}
+.qa-card .qa-icon {
+    width: 54px; height: 54px;
+    border-radius: 15px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin: 0 auto .65rem;
+    transition: transform .25s ease;
+    /* NO backdrop-filter */
+}
+.qa-card:hover .qa-icon { transform: scale(1.1) rotate(-4deg); }
+.qa-card .qa-label {
+    font-size: .84rem;
+    font-weight: 700;
+    color: #111827;
+    display: block;
+}
+
+/* ================================================================
+   WHITE PANEL CARDS (charts, activity, payments)
+   ================================================================ */
+.panel-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    height: 100%;
+}
+.panel-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: .93rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* ================================================================
+   ACTIVITY LIST
+   ================================================================ */
+.act-row {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: .85rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+.act-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+.act-dot {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem;
+    flex-shrink: 0;
+    /* NO backdrop-filter */
+}
+.act-dot i { color: #ffffff !important; }
+
+.act-name {
+    font-size: .87rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: .1rem;
+}
+.act-meta {
+    font-size: .75rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+/* ================================================================
+   STATUS BADGES — solid fill, crisp text
+   ================================================================ */
+.badge-pill {
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 3px 11px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border-width: 1.5px;
+    border-style: solid;
+}
+.bp-pending   { background: #fffbeb; color: #78350f; border-color: #fcd34d; }
+.bp-accepted  { background: #ecfdf5; color: #065f46; border-color: #6ee7b7; }
+.bp-completed { background: #f0fdf4; color: #166534; border-color: #86efac; }
+.bp-rejected  { background: #fef2f2; color: #7f1d1d; border-color: #fca5a5; }
+
+/* ================================================================
+   PAYMENT MINI CARDS
+   ================================================================ */
+.pay-card {
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    padding: .9rem 1rem;
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+.pay-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.09);
+    border-color: #a7f3d0;
+}
+.pay-svc  { font-size: .82rem; font-weight: 700; color: #111827; }
+.pay-date { font-size: .72rem; font-weight: 500; color: #6b7280; }
+.pay-amt  { font-family: 'Poppins', sans-serif; font-size: 1.15rem; font-weight: 900; color: #065f46; margin-top: .4rem; }
+
+/* ================================================================
+   EMPTY STATE
+   ================================================================ */
+.empty-state { text-align: center; padding: 2rem; color: #6b7280; font-size: .88rem; font-weight: 600; }
+.empty-state i { font-size: 2rem; margin-bottom: .5rem; display: block; color: #9ca3af !important; }
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 576px) {
+    .stat-card .sc-num   { font-size: 1.75rem; }
+    .stat-card .sc-label { font-size: .73rem; }
+    .stat-card           { padding: 1.1rem; }
+    .dash-hero           { padding: 1.6rem 1.4rem; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="dashboard-page">
-    <div class="container-fluid">
-        
-        <!-- 1. Dashboard Header -->
-        <div class="dashboard-header animate-fade-up">
-            <h1 class="fw-800 h2 mb-1">Welcome back, {{ request.user.first_name|default:request.user.username }}! 👋</h1>
-            <p class="mb-0 text-white text-opacity-75">Here is your real-time performance overview and recent activity.</p>
-        </div>
 
-        <!-- 2. Big Colorful Stat Cards -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-4 animate-fade-up" style="animation-delay: 0.1s;">
-            <!-- Widget 1: Services (Blue) -->
-            <div class="col">
-                <div class="dashboard-stat-card bg-grad-blue">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small fw-bold text-uppercase text-white text-opacity-75 mb-1" style="letter-spacing: 1px; font-size: 10px;">Services</div>
-                            <div class="h2 fw-900 mb-0">{{ total_services }}</div>
-                        </div>
-                        <div class="dash-icon-box"><i class="fas fa-tools"></i></div>
-                    </div>
-                    <div class="mt-3 d-flex align-items-center justify-content-between">
-                        <div class="progress flex-grow-1 me-3" style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px;">
-                            <div class="progress-bar bg-white" style="width: {{ services_percent }}%"></div>
-                        </div>
-                        <span class="small fw-bold">{{ services_percent }}%</span>
-                    </div>
-                </div>
+    <!-- ===== HERO BANNER ===== -->
+    <div class="dash-hero mb-4" data-aos="fade-down">
+        <!-- Decorative bg icons (faint, behind text layer) -->
+        <span class="float-icon" style="top:14px;right:110px;animation-delay:.2s;"><i class="fas fa-graduation-cap" style="color:white;"></i></span>
+        <span class="float-icon" style="top:38px;right:195px;animation-delay:.9s;font-size:1.1rem;"><i class="fas fa-laptop-code" style="color:white;"></i></span>
+        <span class="float-icon" style="bottom:18px;right:75px;animation-delay:1.3s;"><i class="fas fa-book" style="color:white;"></i></span>
+        <span class="float-icon" style="bottom:36px;right:165px;animation-delay:.5s;font-size:.95rem;"><i class="fas fa-code" style="color:white;"></i></span>
+
+        <div class="d-flex align-items-center gap-3">
+            <div class="hero-avatar">
+                <i class="fas fa-user-graduate"></i>
             </div>
-
-            <!-- Widget 2: Requests (Green) -->
-            <div class="col">
-                <div class="dashboard-stat-card bg-grad-green">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small fw-bold text-uppercase text-white text-opacity-75 mb-1" style="letter-spacing: 1px; font-size: 10px;">Completed</div>
-                            <div class="h2 fw-900 mb-0">{{ accepted_requests }}</div>
-                        </div>
-                        <div class="dash-icon-box"><i class="fas fa-check-double"></i></div>
-                    </div>
-                    <div class="mt-3 d-flex align-items-center justify-content-between">
-                        <span class="small fw-bold text-white text-opacity-75">Acceptance Rate</span>
-                        <div class="metric-circle" style="--p: {{ acceptance_rate }}%;">
-                            <span class="extra-small fw-bold position-absolute" style="font-size: 8px; z-index: 2;">{{ acceptance_rate }}%</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="hero-text-block">
+                <span class="hero-tag">Welcome back 👋</span>
+                <h1>{{ request.user.first_name|default:request.user.username }}!</h1>
+                <p class="hero-sub">Your skills are making a difference. Keep growing! 🚀</p>
             </div>
-
-            <!-- Widget 3: Pending (Orange) -->
-            <div class="col">
-                <div class="dashboard-stat-card bg-grad-orange">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small fw-bold text-uppercase text-white text-opacity-75 mb-1" style="letter-spacing: 1px; font-size: 10px;">Pending Requests</div>
-                            <div class="h2 fw-900 mb-0">{{ total_requests }}</div>
-                        </div>
-                        <div class="dash-icon-box"><i class="fas fa-clock"></i></div>
-                    </div>
-                    <div class="mt-3">
-                        <div class="progress" style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px;">
-                            <div class="progress-bar bg-white" style="width: {{ requests_percent }}%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Widget 4: Earnings (Purple) -->
-            <div class="col">
-                <div class="dashboard-stat-card bg-grad-purple">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small fw-bold text-uppercase text-white text-opacity-75 mb-1" style="letter-spacing: 1px; font-size: 10px;">Total Earnings</div>
-                            <div class="h2 fw-900 mb-0">₹{{ total_earnings|floatformat:0 }}</div>
-                        </div>
-                        <div class="dash-icon-box"><i class="fas fa-rupee-sign"></i></div>
-                    </div>
-                    <div class="mt-3 d-flex align-items-center justify-content-between">
-                        <span class="small fw-bold text-white text-opacity-75">Revenue Goal</span>
-                        <span class="small fw-bold">{{ earnings_percent }}%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Quick Actions -->
-        <h5 class="fw-800 text-dark mb-3 animate-fade-up" style="animation-delay: 0.15s;">Quick Actions</h5>
-        <div class="row g-3 mb-4 animate-fade-up" style="animation-delay: 0.2s;">
-            <div class="col-md-4">
-                <a href="{% url 'post_service' %}" class="quick-btn">
-                    <i class="fas fa-plus-circle"></i>
-                    Post New Service
+            <div class="ms-auto d-none d-md-flex gap-2" style="position:relative;z-index:3;">
+                <a href="{% url 'post_service' %}" class="hero-btn-outline">
+                    <i class="fas fa-plus"></i> New Service
+                </a>
+                <a href="{% url 'inbox' %}" class="hero-btn-solid">
+                    <i class="fas fa-inbox"></i> Inbox
                 </a>
             </div>
-            <div class="col-md-4">
-                <a href="{% url 'inbox' %}" class="quick-btn">
+        </div>
+    </div>
+
+    <!-- ===== STAT CARDS ===== -->
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
+            <div class="stat-card gc-blue">
+                <div class="sc-deco"></div>
+                <div class="sc-icon"><i class="fas fa-tools"></i></div>
+                <div class="sc-num">{{ total_services }}</div>
+                <div class="sc-label">Active Services</div>
+                <div class="sc-bar"><div class="sc-bar-fill" style="width:{{ services_percent|default:60 }}%;"></div></div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="70">
+            <div class="stat-card gc-green">
+                <div class="sc-deco"></div>
+                <div class="sc-icon"><i class="fas fa-check-double"></i></div>
+                <div class="sc-num">{{ accepted_requests }}</div>
+                <div class="sc-label">Completed</div>
+                <div class="sc-bar"><div class="sc-bar-fill" style="width:{{ acceptance_rate|default:40 }}%;"></div></div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="140">
+            <div class="stat-card gc-amber">
+                <div class="sc-deco"></div>
+                <div class="sc-icon"><i class="fas fa-clock"></i></div>
+                <div class="sc-num">{{ total_requests }}</div>
+                <div class="sc-label">Pending</div>
+                <div class="sc-bar"><div class="sc-bar-fill" style="width:{{ requests_percent|default:50 }}%;"></div></div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="210">
+            <div class="stat-card gc-violet">
+                <div class="sc-deco"></div>
+                <div class="sc-icon"><i class="fas fa-rupee-sign"></i></div>
+                <div class="sc-num">₹{{ total_earnings|floatformat:0 }}</div>
+                <div class="sc-label">Total Earnings</div>
+                <div class="sc-bar"><div class="sc-bar-fill" style="width:{{ earnings_percent|default:70 }}%;"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== QUICK ACTIONS ===== -->
+    <div data-aos="fade-up" data-aos-delay="80" class="mb-4">
+        <div class="sec-title">
+            <div class="s-pill" style="background:#eef2ff;"><i class="fas fa-bolt" style="color:#6366f1 !important;"></i></div>
+            Quick Actions
+        </div>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <a href="{% url 'post_service' %}" class="qa-card">
+                    <div class="qa-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                        <i class="fas fa-plus" style="color:#ffffff !important;"></i>
+                    </div>
+                    <span class="qa-label">Post Service</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'inbox' %}" class="qa-card">
+                    <div class="qa-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8);">
+                        <i class="fas fa-inbox" style="color:#ffffff !important;"></i>
+                    </div>
+                    <span class="qa-label">View Inbox</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'payment_history' %}" class="qa-card">
+                    <div class="qa-icon" style="background:linear-gradient(135deg,#059669,#34d399);">
+                        <i class="fas fa-credit-card" style="color:#ffffff !important;"></i>
+                    </div>
+                    <span class="qa-label">Payments</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'search' %}" class="qa-card">
+                    <div class="qa-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24);">
+                        <i class="fas fa-search" style="color:#ffffff !important;"></i>
+                    </div>
+                    <span class="qa-label">Browse Services</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CHARTS + ACTIVITY ===== -->
+    <div class="row g-4">
+        <!-- 7-Day Line Chart -->
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="40">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="panel-title">
+                        <i class="fas fa-chart-line me-2" style="color:#6366f1;"></i>7-Day Activity
+                    </span>
+                </div>
+                <canvas id="activityChart" height="210"></canvas>
+            </div>
+        </div>
+
+        <!-- Category Doughnut -->
+        <div class="col-lg-3" data-aos="fade-up" data-aos-delay="90">
+            <div class="panel-card d-flex flex-column">
+                <span class="panel-title mb-3">
+                    <i class="fas fa-chart-pie me-2" style="color:#8b5cf6;"></i>My Categories
+                </span>
+                <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                    <canvas id="catChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Requests -->
+        <div class="col-lg-5" data-aos="fade-up" data-aos-delay="120">
+            <div class="panel-card">
+                <div class="sec-title mb-3">
+                    <div class="s-pill" style="background:#fef3c7;">
+                        <i class="fas fa-bell" style="color:#d97706 !important;"></i>
+                    </div>
+                    Latest Requests
+                    <a href="{% url 'inbox' %}" class="ms-auto"
+                       style="font-size:.78rem;color:#6366f1;font-weight:700;text-decoration:none;">View all →</a>
+                </div>
+
+                {% for req in recent_requests|slice:":5" %}
+                <div class="act-row">
+                    <div class="act-dot" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                        <i class="fas fa-envelope-open-text"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="act-name">{{ req.service.title|truncatechars:30 }}</div>
+                        <div class="act-meta">
+                            {% if request.user == req.sender %}To @{{ req.receiver.username }}{% else %}From @{{ req.sender.username }}{% endif %}
+                            &bull; {{ req.created_at|date:"M d" }}
+                        </div>
+                    </div>
+                    <span class="badge-pill bp-{{ req.status }}">{{ req.status|title }}</span>
+                </div>
+                {% empty %}
+                <div class="empty-state">
                     <i class="fas fa-inbox"></i>
-                    View Inbox
-                </a>
-            </div>
-            <div class="col-md-4">
-                <a href="#" class="quick-btn">
-                    <i class="fas fa-credit-card"></i>
-                    View Payments
-                </a>
+                    No requests yet. Start by browsing services!
+                </div>
+                {% endfor %}
             </div>
         </div>
+    </div>
 
-        <!-- 4. Recent Activity Panels -->
-        <div class="row g-4 animate-fade-up" style="animation-delay: 0.3s;">
-            <!-- Latest Requests -->
-            <div class="col-lg-6">
-                <div class="activity-card">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="fw-800 mb-0 text-dark"><i class="fas fa-bell text-warning me-2"></i>Latest Requests</h6>
-                        <a href="{% url 'inbox' %}" class="small font-weight-bold text-primary text-decoration-none">View All</a>
+    <!-- ===== RECENT PAYMENTS ===== -->
+    <div class="row g-4 mt-1">
+        <div class="col-12" data-aos="fade-up" data-aos-delay="60">
+            <div class="panel-card">
+                <div class="sec-title mb-3">
+                    <div class="s-pill" style="background:#d1fae5;">
+                        <i class="fas fa-receipt" style="color:#059669 !important;"></i>
                     </div>
-                    <div class="activity-list">
-                        {% for req in recent_requests|slice:":4" %}
-                            <div class="d-flex align-items-center border-bottom pb-3 mb-3 last-child-no-border">
-                                <div class="dash-icon-box bg-light text-primary me-3" style="width: 40px; height: 40px;">
-                                    <i class="fas fa-envelope-open-text"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 text-dark fw-bold small">{{ req.service.title }}</h6>
-                                    <p class="mb-0 text-muted extra-small">
-                                        {% if request.user == req.sender %}Sent to @{{ req.receiver.username }}{% else %}From @{{ req.sender.username }}{% endif %}
-                                        • {{ req.created_at|date:"M d" }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <span class="badge {% if req.status == 'accepted' %}bg-success{% elif req.status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %} bg-opacity-10 {% if req.status == 'accepted' %}text-success{% elif req.status == 'pending' %}text-warning{% else %}text-secondary{% endif %} rounded-pill px-3 py-1">
-                                        {{ req.status }}
-                                    </span>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <div class="text-center py-4 text-muted small">No recent requests.</div>
-                        {% endfor %}
-                    </div>
+                    Recent Transactions
                 </div>
-            </div>
-
-            <!-- Latest Payments -->
-            <div class="col-lg-6">
-                <div class="activity-card">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="fw-800 mb-0 text-dark"><i class="fas fa-file-invoice-dollar text-success me-2"></i>Recent Transactions</h6>
-                    </div>
-                    <div class="activity-list">
-                        {% for payment in latest_payments|slice:":4" %}
-                            <div class="d-flex align-items-center border-bottom pb-3 mb-3 last-child-no-border">
-                                <div class="dash-icon-box bg-light text-success me-3" style="width: 40px; height: 40px;">
+                <div class="row g-3">
+                    {% for payment in latest_payments|slice:":4" %}
+                    <div class="col-md-3 col-sm-6">
+                        <div class="pay-card">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <div class="act-dot" style="width:36px;height:36px;background:linear-gradient(135deg,#059669,#34d399);font-size:.8rem;">
                                     <i class="fas fa-check"></i>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 text-dark fw-bold small">{{ payment.service.title }}</h6>
-                                    <p class="mb-0 text-muted extra-small">Paid via {{ payment.payment_method|upper }} • {{ payment.timestamp|date:"M d" }}</p>
-                                </div>
-                                <div class="fw-bold text-dark">
-                                    ₹{{ payment.amount|floatformat:0 }}
+                                <div>
+                                    <div class="pay-svc">{{ payment.service.title|truncatechars:18 }}</div>
+                                    <div class="pay-date">{{ payment.timestamp|date:"M d, Y" }}</div>
                                 </div>
                             </div>
-                        {% empty %}
-                            <div class="text-center py-4 text-muted small">No recent payments.</div>
-                        {% endfor %}
+                            <div class="pay-amt">₹{{ payment.amount|floatformat:0 }}</div>
+                        </div>
                     </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <i class="fas fa-credit-card"></i> No payments yet.
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-
     </div>
+
 </div>
-<style>
-.last-child-no-border:last-child { border-bottom: none !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
-</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ---- 7-Day Activity Line Chart ----
+const ctx1 = document.getElementById('activityChart');
+if (ctx1) {
+    new Chart(ctx1.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Requests',
+                data: {{ chart_data|safe }},
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,0.07)',
+                borderWidth: 2.5,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#6b7280' } },
+                x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#6b7280' } }
+            }
+        }
+    });
+}
+
+// ---- Category Doughnut Chart ----
+const ctx2 = document.getElementById('catChart');
+if (ctx2) {
+    const catLabels = {{ cat_labels|safe }};
+    const catData   = {{ cat_data|safe }};
+    if (catData.length > 0) {
+        new Chart(ctx2.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catData,
+                    backgroundColor: ['#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#0ea5e9','#ec4899'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { family: 'Poppins', size: 10 }, boxWidth: 10, color: '#374151' }
+                    }
+                }
+            }
+        });
+    } else {
+        ctx2.parentElement.innerHTML = '<div class="empty-state"><i class="fas fa-chart-pie"></i>Post services to see breakdown</div>';
+    }
+}
+</script>
 {% endblock %}
